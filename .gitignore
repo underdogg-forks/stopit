@@ -19,6 +19,10 @@
 /storage/*.key
 /storage/pail
 /vendor
+.env
+.env.backup
+.env.production
+.phpunit.result.cache
 Homestead.json
 Homestead.yaml
 auth.json
