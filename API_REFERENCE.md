@@ -1,13 +1,16 @@
 # Stopit API Quick Reference
 
 ## Base URL
-```
+
+```text
 http://localhost:8000/api/v1
 ```
 
 ## Authentication
+
 All requests require a Bearer token:
-```
+
+```http
 Authorization: Bearer YOUR_API_TOKEN_HERE
 ```
 
@@ -123,7 +126,15 @@ $response = $client->post('/api/v1/exceptions', [
 
 ## Rate Limiting
 
-Currently no rate limiting is enforced. This may change in future versions.
+Currently no rate limiting is enforced. Future versions may implement rate limiting policies (e.g., requests per minute, burst policies).
+
+For self-hosted deployments, it is recommended to enforce rate limiting at the infrastructure level (API gateway, reverse proxy, or load balancer). Common strategies include:
+
+- Per-IP rate limiting
+- Per-API-key rate limiting
+- Per-user rate limiting
+
+Example configurations can be implemented using Nginx, Apache, or cloud-based API gateways.
 
 ## Support
 
