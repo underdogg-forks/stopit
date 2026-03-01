@@ -15,8 +15,10 @@ trait BelongsToManyAccounts
 
     public function scopeForUser(Builder $query, int $userId): Builder
     {
-        return $query->whereHas('accounts.users', function (Builder $q) use ($userId) {
-            $q->where('users.id', $userId);
+        return $query->whereHas('accounts', function (Builder $q) use ($userId) {
+            $q->whereHas('users', function (Builder $userQuery) use ($userId) {
+                $userQuery->where('users.id', $userId);
+            });
         });
     }
 }

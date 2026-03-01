@@ -3,10 +3,13 @@
 namespace Modules\Stopit\Filament\Widgets;
 
 use Filament\Widgets\ChartWidget;
+use Modules\Stopit\Filament\Traits\HasUserAccount;
 use Modules\Stopit\Services\DashboardService;
 
 class ExceptionsByClassWidget extends ChartWidget
 {
+    use HasUserAccount;
+    
     public ?int $applicationId = null;
 
     protected static ?string $heading = 'Exceptions by Class';
@@ -38,17 +41,6 @@ class ExceptionsByClassWidget extends ChartWidget
     protected function getType(): string
     {
         return 'bar';
-    }
-
-    protected function getUserAccountId(): ?int
-    {
-        $user = auth()->user();
-        if (!$user) {
-            return null;
-        }
-        
-        $account = $user->accounts()->first();
-        return $account?->id;
     }
 
     protected function resolveApplicationId(): int
