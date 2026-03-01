@@ -4,10 +4,13 @@ namespace Modules\Stopit\Filament\Widgets;
 
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
+use Modules\Stopit\Filament\Traits\HasUserAccount;
 use Modules\Stopit\Services\DashboardService;
 
 class ExceptionStatsWidget extends BaseWidget
 {
+    use HasUserAccount;
+    
     public ?int $applicationId = null;
 
     protected function getStats(): array
@@ -28,17 +31,6 @@ class ExceptionStatsWidget extends BaseWidget
             Stat::make('Critical', $counts['critical'])
                 ->color('danger'),
         ];
-    }
-
-    protected function getUserAccountId(): ?int
-    {
-        $user = auth()->user();
-        if (!$user) {
-            return null;
-        }
-        
-        $account = $user->accounts()->first();
-        return $account?->id;
     }
 
     protected function resolveApplicationId(): int
