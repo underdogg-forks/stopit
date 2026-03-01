@@ -30,7 +30,8 @@ class DashboardServiceTest extends TestCase
     {
         /* Arrange */
         $account = Account::factory()->create();
-        $application = Application::factory()->create(['account_id' => $account->id]);
+        $application = Application::factory()->create();
+        $application->accounts()->attach($account->id);
         
         ExceptionRecord::factory()->count(15)->create([
             'application_id' => $application->id,
@@ -48,7 +49,8 @@ class DashboardServiceTest extends TestCase
     {
         /* Arrange */
         $account = Account::factory()->create();
-        $application = Application::factory()->create(['account_id' => $account->id]);
+        $application = Application::factory()->create();
+        $application->accounts()->attach($account->id);
         
         ExceptionRecord::factory()->create([
             'application_id' => $application->id,
@@ -80,7 +82,8 @@ class DashboardServiceTest extends TestCase
     {
         /* Arrange */
         $account = Account::factory()->create();
-        $application = Application::factory()->create(['account_id' => $account->id]);
+        $application = Application::factory()->create();
+        $application->accounts()->attach($account->id);
         
         ExceptionRecord::factory()->count(3)->create([
             'application_id' => $application->id,
@@ -123,7 +126,8 @@ class DashboardServiceTest extends TestCase
     {
         /* Arrange */
         $account = Account::factory()->create();
-        $application = Application::factory()->create(['account_id' => $account->id]);
+        $application = Application::factory()->create();
+        $application->accounts()->attach($account->id);
         
         $oldest = ExceptionRecord::factory()->create([
             'application_id' => $application->id,

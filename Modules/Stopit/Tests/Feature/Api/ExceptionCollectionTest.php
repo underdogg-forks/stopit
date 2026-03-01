@@ -25,9 +25,9 @@ class ExceptionCollectionTest extends TestCase
         $plainToken = 'test-token-12345678901234567890123456789012345678901234567890';
         $hashedToken = hash('sha256', $plainToken);
         $application = Application::factory()->create([
-            'account_id' => $account->id,
             'api_token' => $hashedToken,
         ]);
+        $application->accounts()->attach($account->id);
 
         $payload = [
             'exception_class' => 'RuntimeException',
@@ -96,10 +96,10 @@ class ExceptionCollectionTest extends TestCase
         $account = Account::factory()->create();
         $plainToken = 'test-token-12345678901234567890123456789012345678901234567890';
         $hashedToken = hash('sha256', $plainToken);
-        Application::factory()->create([
-            'account_id' => $account->id,
+        $application = Application::factory()->create([
             'api_token' => $hashedToken,
         ]);
+        $application->accounts()->attach($account->id);
 
         $payload = [
             'message' => 'Test error',
@@ -123,9 +123,9 @@ class ExceptionCollectionTest extends TestCase
         $plainToken = 'test-token-12345678901234567890123456789012345678901234567890';
         $hashedToken = hash('sha256', $plainToken);
         $application = Application::factory()->create([
-            'account_id' => $account->id,
             'api_token' => $hashedToken,
         ]);
+        $application->accounts()->attach($account->id);
 
         $payload = [
             'exception_class' => 'RuntimeException',
