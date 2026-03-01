@@ -32,7 +32,8 @@ class ExceptionCollectionServiceTest extends TestCase
     {
         /* Arrange */
         $account = Account::factory()->create();
-        $application = Application::factory()->create(['account_id' => $account->id]);
+        $application = Application::factory()->create();
+        $application->accounts()->attach($account->id);
         
         $data = new ExceptionData();
         $data->setExceptionClass('RuntimeException')
@@ -61,7 +62,8 @@ class ExceptionCollectionServiceTest extends TestCase
     {
         /* Arrange */
         $account = Account::factory()->create();
-        $application = Application::factory()->create(['account_id' => $account->id]);
+        $application = Application::factory()->create();
+        $application->accounts()->attach($account->id);
         
         $data = new ExceptionData();
         $data->setExceptionClass('RuntimeException')
@@ -83,7 +85,8 @@ class ExceptionCollectionServiceTest extends TestCase
     {
         /* Arrange */
         $account = Account::factory()->create();
-        $application = Application::factory()->create(['account_id' => $account->id]);
+        $application = Application::factory()->create();
+        $application->accounts()->attach($account->id);
         
         $data1 = new ExceptionData();
         $data1->setExceptionClass('RuntimeException')
@@ -109,7 +112,8 @@ class ExceptionCollectionServiceTest extends TestCase
     {
         /* Arrange */
         $account = Account::factory()->create();
-        $application = Application::factory()->create(['account_id' => $account->id]);
+        $application = Application::factory()->create();
+        $application->accounts()->attach($account->id);
         $exception = ExceptionRecord::factory()->create([
             'application_id' => $application->id,
             'is_resolved' => false,
@@ -131,7 +135,8 @@ class ExceptionCollectionServiceTest extends TestCase
     {
         /* Arrange */
         $account = Account::factory()->create();
-        $application = Application::factory()->create(['account_id' => $account->id]);
+        $application = Application::factory()->create();
+        $application->accounts()->attach($account->id);
         
         $data = new ExceptionData();
         $data->setExceptionClass('')
@@ -150,7 +155,8 @@ class ExceptionCollectionServiceTest extends TestCase
     {
         /* Arrange */
         $account = Account::factory()->create();
-        $application = Application::factory()->create(['account_id' => $account->id]);
+        $application = Application::factory()->create();
+        $application->accounts()->attach($account->id);
         
         ExceptionRecord::factory()->count(5)->create([
             'application_id' => $application->id,

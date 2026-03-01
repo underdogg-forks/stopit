@@ -46,9 +46,14 @@ class ApplicationServiceTest extends TestCase
         $this->assertEquals(64, strlen($result['plain_token']));
         
         $this->assertDatabaseHas('applications', [
-            'account_id' => $account->id,
             'name' => 'Test App',
             'slug' => 'test-app',
+        ]);
+        
+        // Verify pivot relationship
+        $this->assertDatabaseHas('account_application', [
+            'account_id' => $account->id,
+            'application_id' => $result['application']->id,
         ]);
     }
 

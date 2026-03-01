@@ -24,17 +24,17 @@ class CrossApplicationIsolationTest extends TestCase
         
         $token1 = 'token1-123456789012345678901234567890123456789012345678901234';
         $app1 = Application::factory()->create([
-            'account_id' => $account->id,
             'name' => 'App1',
             'api_token' => hash('sha256', $token1),
         ]);
+        $app1->accounts()->attach($account->id);
         
         $token2 = 'token2-123456789012345678901234567890123456789012345678901234';
         $app2 = Application::factory()->create([
-            'account_id' => $account->id,
             'name' => 'App2',
             'api_token' => hash('sha256', $token2),
         ]);
+        $app2->accounts()->attach($account->id);
 
         /* Act */
         $response1 = $this->postJson('/api/v1/exceptions', [
@@ -70,15 +70,15 @@ class CrossApplicationIsolationTest extends TestCase
         
         $token1 = 'token1-123456789012345678901234567890123456789012345678901234';
         $app1 = Application::factory()->create([
-            'account_id' => $account->id,
             'api_token' => hash('sha256', $token1),
         ]);
+        $app1->accounts()->attach($account->id);
         
         $token2 = 'token2-123456789012345678901234567890123456789012345678901234';
         $app2 = Application::factory()->create([
-            'account_id' => $account->id,
             'api_token' => hash('sha256', $token2),
         ]);
+        $app2->accounts()->attach($account->id);
 
         /* Act */
         $this->postJson('/api/v1/exceptions', [
@@ -99,15 +99,15 @@ class CrossApplicationIsolationTest extends TestCase
         
         $token1 = 'token1-123456789012345678901234567890123456789012345678901234';
         $app1 = Application::factory()->create([
-            'account_id' => $account->id,
             'api_token' => hash('sha256', $token1),
         ]);
+        $app1->accounts()->attach($account->id);
         
         $token2 = 'token2-123456789012345678901234567890123456789012345678901234';
         $app2 = Application::factory()->create([
-            'account_id' => $account->id,
             'api_token' => hash('sha256', $token2),
         ]);
+        $app2->accounts()->attach($account->id);
 
         /* Act */
         $this->postJson('/api/v1/exceptions', [
@@ -141,15 +141,15 @@ class CrossApplicationIsolationTest extends TestCase
         
         $token1 = 'token1-123456789012345678901234567890123456789012345678901234';
         $app1 = Application::factory()->create([
-            'account_id' => $account->id,
             'api_token' => hash('sha256', $token1),
         ]);
+        $app1->accounts()->attach($account->id);
         
         $token2 = 'token2-123456789012345678901234567890123456789012345678901234';
         $app2 = Application::factory()->create([
-            'account_id' => $account->id,
             'api_token' => hash('sha256', $token2),
         ]);
+        $app2->accounts()->attach($account->id);
 
         $payload = [
             'exception_class' => 'RuntimeException',
@@ -181,15 +181,15 @@ class CrossApplicationIsolationTest extends TestCase
         
         $token1 = 'token1-123456789012345678901234567890123456789012345678901234';
         $app1 = Application::factory()->create([
-            'account_id' => $account1->id,
             'api_token' => hash('sha256', $token1),
         ]);
+        $app1->accounts()->attach($account1->id);
         
         $token2 = 'token2-123456789012345678901234567890123456789012345678901234';
         $app2 = Application::factory()->create([
-            'account_id' => $account2->id,
             'api_token' => hash('sha256', $token2),
         ]);
+        $app2->accounts()->attach($account2->id);
 
         /* Act */
         $this->postJson('/api/v1/exceptions', [
@@ -208,8 +208,9 @@ class CrossApplicationIsolationTest extends TestCase
         $app1Exception = ExceptionRecord::where('application_id', $app1->id)->first();
         $app2Exception = ExceptionRecord::where('application_id', $app2->id)->first();
         
-        $this->assertEquals($account1->id, $app1Exception->application->account_id);
-        $this->assertEquals($account2->id, $app2Exception->application->account_id);
+        // Verify applications belong to different accounts via pivot
+        $this->assertTrue($app1Exception->application->accounts()->where('accounts.id', $account1->id)->exists());
+        $this->assertTrue($app2Exception->application->accounts()->where('accounts.id', $account2->id)->exists());
         $this->assertEquals(1, $app1Exception->occurrence_count);
         $this->assertEquals(1, $app2Exception->occurrence_count);
     }
@@ -223,13 +224,12 @@ class CrossApplicationIsolationTest extends TestCase
         
         $token1 = 'token1-123456789012345678901234567890123456789012345678901234';
         $app1 = Application::factory()->create([
-            'account_id' => $account1->id,
             'api_token' => hash('sha256', $token1),
         ]);
+        $app1->accounts()->attach($account1->id);
         
-        Application::factory()->create([
-            'account_id' => $account2->id,
-        ]);
+        $app2 = Application::factory()->create();
+        $app2->accounts()->attach($account2->id);
 
         /* Act */
         $this->postJson('/api/v1/exceptions', [
@@ -239,11 +239,11 @@ class CrossApplicationIsolationTest extends TestCase
 
         /* Assert */
         $this->assertEquals(1, ExceptionRecord::whereHas('application', function ($q) use ($account1) {
-            $q->where('account_id', $account1->id);
+            $q->whereHas('accounts', fn($aq) => $aq->where('accounts.id', $account1->id));
         })->count());
         
         $this->assertEquals(0, ExceptionRecord::whereHas('application', function ($q) use ($account2) {
-            $q->where('account_id', $account2->id);
+            $q->whereHas('accounts', fn($aq) => $aq->where('accounts.id', $account2->id));
         })->count());
     }
 }
