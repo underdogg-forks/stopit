@@ -104,4 +104,45 @@ class ExceptionRepository implements ExceptionRepositoryContract
             ->pluck('count', 'exception_class')
             ->toArray();
     }
+
+    public function getCountBySeverityForAccount(int $accountId): array
+    {
+        $counts = ExceptionRecord::whereHas('application.accounts', function ($query) use ($accountId) {
+                $query->where('accounts.id', $accountId);
+            })
+            ->select('severity', DB::raw('COUNT(*) as count'))
+            ->groupBy('severity')
+            ->pluck('count', 'severity')
+            ->toArray();
+        
+        return [
+            'info' => $counts['info'] ?? 0,
+            'warning' => $counts['warning'] ?? 0,
+            'error' => $counts['error'] ?? 0,
+            'critical' => $counts['critical'] ?? 0,
+        ];
+    }
+
+    public function getCountByClassForAccount(int $accountId): array
+    {
+        return ExceptionRecord::whereHas('application.accounts', function ($query) use ($accountId) {
+                $query->where('accounts.id', $accountId);
+            })
+            ->select('exception_class', DB::raw('COUNT(*) as count'))
+            ->groupBy('exception_class')
+            ->orderBy('count', 'desc')
+            ->pluck('count', 'exception_class')
+            ->toArray();
+    }
+
+    public function getRecentForAccount(int $accountId, int $limit = 10): Collection
+    {
+        return ExceptionRecord::whereHas('application.accounts', function ($query) use ($accountId) {
+                $query->where('accounts.id', $accountId);
+            })
+            ->with('application')
+            ->orderBy('last_occurred_at', 'desc')
+            ->limit($limit)
+            ->get();
+    }
 }
