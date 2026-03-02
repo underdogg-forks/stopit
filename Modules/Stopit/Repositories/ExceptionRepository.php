@@ -140,7 +140,7 @@ class ExceptionRepository implements ExceptionRepositoryContract
             ->get();
     }
 
-    private function queryForAccount(int $accountId)
+    private function queryForAccount(int $accountId): \Illuminate\Database\Eloquent\Builder
     {
         return ExceptionRecord::whereHas('application.accounts', function ($query) use ($accountId) {
             $query->where('accounts.id', $accountId);

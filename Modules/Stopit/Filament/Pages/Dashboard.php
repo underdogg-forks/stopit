@@ -19,9 +19,14 @@ class Dashboard extends BaseDashboard
                     ->label('Application')
                     ->options(function () {
                         $user = auth()->user();
-                        $firstAccount = $user->accounts()->first();
                         
-                        if (!$firstAccount) {
+                        if (! $user) {
+                            return [];
+                        }
+                        
+                        $firstAccount = $user->accounts()->orderBy('id')->first();
+                        
+                        if (! $firstAccount) {
                             return [];
                         }
                         
