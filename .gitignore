@@ -19,10 +19,6 @@
 /storage/*.key
 /storage/pail
 /vendor
-.env
-.env.backup
-.env.production
-.phpunit.result.cache
 Homestead.json
 Homestead.yaml
 auth.json
@@ -32,3 +28,6 @@ yarn-error.log
 !/bootstrap/cache/.gitkeep
 /storage/framework/cache/*
 !/storage/framework/cache/.gitkeep
+/stan.txt
+/todo.txt
+

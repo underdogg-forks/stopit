@@ -1,0 +1,11 @@
+{
+    "name": "Stopit",
+    "alias": "stopit",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Stopit\\Providers\\StopitServiceProvider"
+    ],
+    "files": []
+}
