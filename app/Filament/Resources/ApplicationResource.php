@@ -2,16 +2,15 @@
 
 namespace App\Providers\Resources;
 
+use App\Providers\Resources\ApplicationResource\Forms\ApplicationForm;
+use App\Providers\Resources\ApplicationResource\Tables\ApplicationTable;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Modules\Stopit\Providers\Filament\Resources\ApplicationResource\Pages;
 use Modules\Stopit\Providers\Filament\Resources\Form;
 use Modules\Stopit\Providers\Models\Application;
-use App\Providers\Resources\ApplicationResource\Forms\ApplicationForm;
-use App\Providers\Resources\ApplicationResource\Tables\ApplicationTable;
 
 class ApplicationResource extends Resource
 {

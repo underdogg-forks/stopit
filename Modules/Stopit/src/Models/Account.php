@@ -5,8 +5,6 @@ namespace Modules\Stopit\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Modules\Stopit\Models\Application;
-use Modules\Stopit\Models\User;
 
 class Account extends Model
 {

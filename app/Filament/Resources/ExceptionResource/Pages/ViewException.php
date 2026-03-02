@@ -2,8 +2,8 @@
 
 namespace App\Providers\Resources\ExceptionResource\Pages;
 
-use Filament\Resources\Pages\ViewRecord;
 use App\Providers\Resources\ExceptionResource;
+use Filament\Resources\Pages\ViewRecord;
 
 class ViewException extends ViewRecord
 {

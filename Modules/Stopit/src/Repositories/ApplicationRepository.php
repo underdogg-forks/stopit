@@ -2,8 +2,8 @@
 
 namespace Modules\Stopit\Repositories;
 
-use Modules\Stopit\Models\Application;
 use Modules\Stopit\Contracts\ApplicationRepositoryContract;
+use Modules\Stopit\Models\Application;
 
 class ApplicationRepository implements ApplicationRepositoryContract
 {

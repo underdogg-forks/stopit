@@ -2,11 +2,11 @@
 
 namespace App\Providers\Resources\ApplicationResource\Pages;
 
+use App\Providers\Resources\ApplicationResource;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
 use Modules\Stopit\Providers\Services\ApplicationService;
 use Modules\Stopit\Providers\src\DTOs\ApplicationData;
-use App\Providers\Resources\ApplicationResource;
 use RuntimeException;
 
 class CreateApplication extends CreateRecord

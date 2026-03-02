@@ -3,9 +3,9 @@
 namespace Modules\Stopit;
 
 use Illuminate\Support\ServiceProvider;
-use Modules\Stopit\Providers\Repositories\ApplicationRepository;
 use Modules\Modules\Stopit\Contracts\ApplicationRepositoryContract;
 use Modules\Modules\Stopit\Contracts\ExceptionRepositoryContract;
+use Modules\Stopit\Providers\Repositories\ApplicationRepository;
 use Modules\Stopit\Providers\Repositories\ExceptionRepository;
 
 class StopitServiceProvider extends ServiceProvider

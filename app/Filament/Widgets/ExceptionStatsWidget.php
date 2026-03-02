@@ -2,10 +2,10 @@
 
 namespace App\Providers\Widgets;
 
+use App\Providers\Traits\HasUserAccount;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Modules\Stopit\Providers\Services\DashboardService;
-use App\Providers\Traits\HasUserAccount;
 
 class ExceptionStatsWidget extends BaseWidget
 {

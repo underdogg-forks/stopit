@@ -2,8 +2,8 @@
 
 namespace App\Providers\Resources\ExceptionResource\Pages;
 
-use Filament\Resources\Pages\ListRecords;
 use App\Providers\Resources\ExceptionResource;
+use Filament\Resources\Pages\ListRecords;
 
 class ListExceptions extends ListRecords
 {

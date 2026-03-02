@@ -2,15 +2,14 @@
 
 namespace App\Providers\Resources;
 
+use App\Providers\Resources\ExceptionResource\Forms\ExceptionForm;
+use App\Providers\Resources\ExceptionResource\Tables\ExceptionTable;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Modules\Stopit\Providers\Filament\Resources\ExceptionResource\Pages;
 use Modules\Stopit\Providers\Models\ExceptionRecord;
-use App\Providers\Resources\ExceptionResource\Forms\ExceptionForm;
-use App\Providers\Resources\ExceptionResource\Tables\ExceptionTable;
 
 class ExceptionResource extends Resource
 {
