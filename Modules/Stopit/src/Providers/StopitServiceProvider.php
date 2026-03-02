@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\Stopit;
+namespace Stopit\src\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Stopit\src\Providers\Repositories\ApplicationRepository;

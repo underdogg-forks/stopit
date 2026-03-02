@@ -20,8 +20,7 @@
         "php": "^8.2",
         "filament/filament": "^4.8",
         "laravel/framework": "^12.53",
-        "nwidart/laravel-modules": "^12.0.4",
-        "stancl/tenancy": "^3.8"
+        "nwidart/laravel-modules": "^12.0.4"
     },
     "require-dev": {
         "driftingly/rector-laravel": "^2.1",
@@ -46,12 +45,17 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Tests\\": "tests/",
-            "Tests\\Feature\\Api\\": "Modules/Stopit/Tests/Feature/Api/",
-            "Tests\\Feature\\Services\\": "Modules/Stopit/Tests/Feature/Services/"
+            "Tests\\": "tests/"
         }
     },
     "scripts": {
+        "aargh": [
+            "composer dump-autoload",
+            "php artisan cache:clear",
+            "php artisan config:clear",
+            "php artisan route:clear",
+            "php artisan view:clear"
+        ],
         "test": [
             "@php artisan config:clear --ansi",
             "@php artisan test"
