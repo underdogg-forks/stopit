@@ -1,10 +1,12 @@
 <?php
 
-namespace Stopit\src\Providers\Models;
+namespace Modules\Stopit\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Modules\Stopit\Models\Application;
+use Modules\Stopit\Models\User;
 
 class Account extends Model
 {
@@ -36,6 +38,6 @@ class Account extends Model
 
     protected static function newFactory()
     {
-        return \Stopit\src\Providers\Database\factories\AccountFactory::new();
+        return \Modules\Stopit\Database\Factories\AccountFactory::new();
     }
 }

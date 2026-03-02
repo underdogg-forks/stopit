@@ -1,6 +1,6 @@
 <?php
 
-namespace Stopit\src\Providers\src\DTOs;
+namespace Modules\Stopit\Providers\src\DTOs;
 
 class ApplicationData
 {

@@ -168,7 +168,7 @@ DB_PASSWORD=
 4. **Create database file** (SQLite only)
 
 ```bash
-touch database/database.sqlite
+touch Database/Database.sqlite
 ```
 
 5. **Run migrations**
@@ -251,7 +251,7 @@ curl -X POST http://localhost:8000/api/v1/exceptions \
     "ip_address": "192.168.1.100",
     "user_id": "12345",
     "context": {
-      "database": "primary",
+      "Database": "primary",
       "retry_count": 3
     },
     "severity": "critical"

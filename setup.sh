@@ -41,10 +41,10 @@ else
     echo "✓ APP_KEY already set, skipping generation..."
 fi
 
-# Create SQLite database
-if [ ! -f database/database.sqlite ]; then
+# Create SQLite Database
+if [ ! -f Database/Database.sqlite ]; then
     echo "💾 Creating SQLite database..."
-    touch database/database.sqlite
+    touch Database/Database.sqlite
 fi
 
 # Create required storage directories
@@ -53,7 +53,7 @@ mkdir -p storage/framework/{sessions,views,cache,testing}
 mkdir -p storage/app/public
 mkdir -p storage/logs
 
-# Run migrations
+# Run Migrations
 echo "🗄️  Running migrations..."
 php artisan migrate --force
 
@@ -61,7 +61,7 @@ php artisan migrate --force
 echo "🔄 Refreshing autoloader..."
 composer dump-autoload
 
-# Seed database
+# Seed Database
 echo "🌱 Seeding database..."
 php artisan db:seed --class='Modules\Stopit\Database\Seeders\StopitSeeder'
 

@@ -1,11 +1,11 @@
 <?php
 
-namespace Stopit\src\Providers\src\Http\Middleware;
+namespace Modules\Stopit\Providers\src\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
-use Stopit\src\Providers\Models\Account;
+use Modules\Stopit\Providers\Models\Account;
 use Symfony\Component\HttpFoundation\Response;
 
 class IdentifyTenant

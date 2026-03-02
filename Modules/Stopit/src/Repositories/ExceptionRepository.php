@@ -1,12 +1,12 @@
 <?php
 
-namespace Stopit\src\Providers\Repositories;
+namespace Modules\Stopit\Repositories;
 
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use Stopit\src\Providers\Models\ExceptionRecord;
-use Stopit\src\Providers\Repositories\Contracts\ExceptionRepositoryContract;
-use Stopit\src\Providers\src\DTOs\ExceptionData;
+use Modules\Stopit\Models\ExceptionRecord;
+use Modules\Stopit\Contracts\ExceptionRepositoryContract;
+use Modules\Stopit\Providers\src\DTOs\ExceptionData;
 
 class ExceptionRepository implements ExceptionRepositoryContract
 {

@@ -1,6 +1,6 @@
 <?php
 
-namespace Stopit\src\Providers\Models;
+namespace Modules\Stopit\Models;
 
 use Illuminate\Database\Eloquent\Relations\Pivot;
 

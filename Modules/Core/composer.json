@@ -18,13 +18,13 @@
     "autoload": {
         "psr-4": {
             "Modules\\Core\\": "src/",
-            "Modules\\Core\\Database\\Factories\\": "database/factories/",
-            "Modules\\Core\\Database\\Seeders\\": "database/seeders/"
+            "Modules\\Core\\Database\\Factories\\": "Database/Factories/",
+            "Modules\\Core\\Database\\Seeders\\": "Database/Seeders/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Modules\\Core\\Tests\\": "tests/"
+            "Modules\\Core\\Tests\\": "Tests/"
         }
     }
 }

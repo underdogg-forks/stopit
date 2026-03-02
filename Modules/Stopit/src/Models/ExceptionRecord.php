@@ -1,11 +1,12 @@
 <?php
 
-namespace Stopit\src\Providers\Models;
+namespace Modules\Stopit\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Modules\Core\Enums\Severity;
+use Modules\Stopit\Models\Application;
 
 class ExceptionRecord extends Model
 {
@@ -41,7 +42,7 @@ class ExceptionRecord extends Model
 
     protected static function newFactory()
     {
-        return \Stopit\src\Providers\Database\factories\ExceptionRecordFactory::new();
+        return \Modules\Stopit\Database\Factories\ExceptionRecordFactory::new();
     }
 
     protected function casts(): array

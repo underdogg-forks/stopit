@@ -1,12 +1,12 @@
 <?php
 
-namespace Stopit\src\Providers\src\Http\Controllers;
+namespace Modules\Stopit\Providers\src\Http\Controllers;
 
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller;
-use Stopit\src\Providers\Services\ExceptionCollectionService;
-use Stopit\src\Providers\src\Http\Requests\StoreExceptionRequest;
-use Stopit\src\Providers\src\Transformers\ExceptionTransformer;
+use Modules\Stopit\Providers\Services\ExceptionCollectionService;
+use Modules\Stopit\Providers\src\Http\Requests\StoreExceptionRequest;
+use Modules\Stopit\Providers\src\Transformers\ExceptionTransformer;
 
 class ExceptionController extends Controller
 {

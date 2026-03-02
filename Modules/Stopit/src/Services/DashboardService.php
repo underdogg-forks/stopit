@@ -1,9 +1,9 @@
 <?php
 
-namespace Stopit\src\Providers\Services;
+namespace Modules\Stopit\Services;
 
 use Illuminate\Support\Collection;
-use Stopit\src\Providers\Repositories\Contracts\ExceptionRepositoryContract;
+use Modules\Stopit\Repositories\Contracts\ExceptionRepositoryContract;
 
 class DashboardService
 {

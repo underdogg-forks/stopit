@@ -1,6 +1,6 @@
 <?php
 
-namespace Stopit\src\Providers\src\Traits;
+namespace Modules\Stopit\Providers\src\Traits;
 
 use Illuminate\Database\Eloquent\Builder;
 
