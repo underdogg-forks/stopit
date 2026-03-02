@@ -9,7 +9,7 @@ use Modules\Stopit\Services\DashboardService;
 class ExceptionsByClassWidget extends ChartWidget
 {
     use HasUserAccount;
-    
+
     public ?int $applicationId = null;
 
     protected static ?string $heading = 'Exceptions by Class';
@@ -19,19 +19,19 @@ class ExceptionsByClassWidget extends ChartWidget
     protected function getData(): array
     {
         $service = app(DashboardService::class);
-        
+
         $applicationId = $this->resolveApplicationId();
-        $accountId = $this->getUserAccountId();
-        $counts = $service->getCountByClass($applicationId, $accountId);
-        
+        $accountId     = $this->getUserAccountId();
+        $counts        = $service->getCountByClass($applicationId, $accountId);
+
         $labels = array_keys($counts);
-        $data = array_values($counts);
-        
+        $data   = array_values($counts);
+
         return [
             'datasets' => [
                 [
                     'label' => 'Occurrences',
-                    'data' => $data,
+                    'data'  => $data,
                 ],
             ],
             'labels' => $labels,
@@ -45,9 +45,9 @@ class ExceptionsByClassWidget extends ChartWidget
 
     protected function resolveApplicationId(): int
     {
-        $filters = $this->filters ?? [];
+        $filters       = $this->filters ?? [];
         $selectedAppId = $filters['applicationId'] ?? $this->applicationId;
-        
+
         if ($selectedAppId) {
             // Verify user has access to this application
             $application = \Modules\Stopit\Models\Application::where('id', $selectedAppId)
@@ -55,12 +55,12 @@ class ExceptionsByClassWidget extends ChartWidget
                     $q->where('users.id', auth()->id());
                 })
                 ->first();
-            
+
             if ($application) {
                 return $application->id;
             }
         }
-        
+
         return 0;
     }
 }

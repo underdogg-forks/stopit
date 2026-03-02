@@ -29,10 +29,10 @@ class DashboardServiceTest extends TestCase
     public function it_returns_recent_exceptions_limited_to_10(): void
     {
         /* Arrange */
-        $account = Account::factory()->create();
+        $account     = Account::factory()->create();
         $application = Application::factory()->create();
         $application->accounts()->attach($account->id);
-        
+
         ExceptionRecord::factory()->count(15)->create([
             'application_id' => $application->id,
         ]);
@@ -48,18 +48,18 @@ class DashboardServiceTest extends TestCase
     public function it_returns_all_severity_keys_with_counts(): void
     {
         /* Arrange */
-        $account = Account::factory()->create();
+        $account     = Account::factory()->create();
         $application = Application::factory()->create();
         $application->accounts()->attach($account->id);
-        
+
         ExceptionRecord::factory()->create([
             'application_id' => $application->id,
-            'severity' => 'info',
+            'severity'       => 'info',
         ]);
-        
+
         ExceptionRecord::factory()->create([
             'application_id' => $application->id,
-            'severity' => 'error',
+            'severity'       => 'error',
         ]);
 
         /* Act */
@@ -70,7 +70,7 @@ class DashboardServiceTest extends TestCase
         $this->assertArrayHasKey('warning', $counts);
         $this->assertArrayHasKey('error', $counts);
         $this->assertArrayHasKey('critical', $counts);
-        
+
         $this->assertEquals(1, $counts['info']);
         $this->assertEquals(0, $counts['warning']);
         $this->assertEquals(1, $counts['error']);
@@ -81,17 +81,17 @@ class DashboardServiceTest extends TestCase
     public function it_returns_count_by_exception_class(): void
     {
         /* Arrange */
-        $account = Account::factory()->create();
+        $account     = Account::factory()->create();
         $application = Application::factory()->create();
         $application->accounts()->attach($account->id);
-        
+
         ExceptionRecord::factory()->count(3)->create([
-            'application_id' => $application->id,
+            'application_id'  => $application->id,
             'exception_class' => 'RuntimeException',
         ]);
-        
+
         ExceptionRecord::factory()->count(2)->create([
-            'application_id' => $application->id,
+            'application_id'  => $application->id,
             'exception_class' => 'InvalidArgumentException',
         ]);
 
@@ -125,22 +125,22 @@ class DashboardServiceTest extends TestCase
     public function it_orders_recent_exceptions_by_last_occurred_at_desc(): void
     {
         /* Arrange */
-        $account = Account::factory()->create();
+        $account     = Account::factory()->create();
         $application = Application::factory()->create();
         $application->accounts()->attach($account->id);
-        
+
         $oldest = ExceptionRecord::factory()->create([
-            'application_id' => $application->id,
+            'application_id'   => $application->id,
             'last_occurred_at' => now()->subHours(3),
         ]);
-        
+
         $newest = ExceptionRecord::factory()->create([
-            'application_id' => $application->id,
+            'application_id'   => $application->id,
             'last_occurred_at' => now(),
         ]);
-        
+
         $middle = ExceptionRecord::factory()->create([
-            'application_id' => $application->id,
+            'application_id'   => $application->id,
             'last_occurred_at' => now()->subHours(1),
         ]);
 

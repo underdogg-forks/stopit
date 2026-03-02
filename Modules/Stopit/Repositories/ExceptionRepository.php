@@ -112,11 +112,11 @@ class ExceptionRepository implements ExceptionRepositoryContract
             ->groupBy('severity')
             ->pluck('count', 'severity')
             ->toArray();
-        
+
         return [
-            'info' => $counts['info'] ?? 0,
-            'warning' => $counts['warning'] ?? 0,
-            'error' => $counts['error'] ?? 0,
+            'info'     => $counts['info'] ?? 0,
+            'warning'  => $counts['warning'] ?? 0,
+            'error'    => $counts['error'] ?? 0,
             'critical' => $counts['critical'] ?? 0,
         ];
     }

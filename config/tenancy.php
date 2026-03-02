@@ -12,7 +12,7 @@ return [
     |
     */
     'central_domain' => env('TENANT_CENTRAL_DOMAIN', 'stopit.dev'),
-    
+
     /*
     |--------------------------------------------------------------------------
     | Base Domain for URL Generation
@@ -22,7 +22,7 @@ return [
     |
     */
     'base_domain' => env('APP_BASE_DOMAIN', 'stopit.dev'),
-    
+
     /*
     |--------------------------------------------------------------------------
     | Session Configuration
@@ -33,7 +33,7 @@ return [
     |
     */
     'session_domain' => env('SESSION_DOMAIN', '.stopit.dev'),
-    
+
     /*
     |--------------------------------------------------------------------------
     | Tenant Identification
@@ -44,7 +44,7 @@ return [
     */
     'identification' => [
         'method' => 'subdomain', // subdomain, path, or header
-        'model' => \Modules\Stopit\Models\Account::class,
+        'model'  => \Modules\Stopit\Models\Account::class,
         'column' => 'domain',
     ],
 ];

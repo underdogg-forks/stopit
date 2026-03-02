@@ -26,13 +26,6 @@ class User extends Authenticatable implements FilamentUser
         'remember_token',
     ];
 
-    protected function casts(): array
-    {
-        return [
-            'password' => 'hashed',
-        ];
-    }
-
     public function accounts(): BelongsToMany
     {
         return $this->belongsToMany(Account::class, 'workspaces')
@@ -48,6 +41,13 @@ class User extends Authenticatable implements FilamentUser
     protected static function newFactory()
     {
         return \Modules\Stopit\Database\Factories\UserFactory::new();
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'password' => 'hashed',
+        ];
     }
 
     protected function casts(): array

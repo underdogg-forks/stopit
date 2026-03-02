@@ -2,6 +2,7 @@
 
 namespace Modules\Stopit\Filament\Resources;
 
+use BackedEnum;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables\Table;
@@ -16,7 +17,7 @@ class ApplicationResource extends Resource
 {
     protected static ?string $model = Application::class;
 
-    protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-cube';
+    protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-cube';
 
     protected static ?int $navigationSort = 1;
 
@@ -38,15 +39,6 @@ class ApplicationResource extends Resource
         return parent::getEloquentQuery()->tap(fn ($query) => static::scopeToUserAccounts($query));
     }
 
-    protected static function scopeToUserAccounts(Builder $query): Builder
-    {
-        return $query->whereHas('accounts', function ($q) {
-            $q->whereHas('users', function ($userQuery) {
-                $userQuery->where('users.id', auth()->id());
-            });
-        });
-    }
-
     public static function canAccess(): bool
     {
         return auth()->check() && auth()->user()->accounts()->exists();
@@ -59,7 +51,7 @@ class ApplicationResource extends Resource
 
     public static function canView(Model $record): bool
     {
-        return $record instanceof Application 
+        return $record instanceof Application
             && $record->accounts()->whereHas('users', fn ($q) => $q->where('users.id', auth()->id()))->exists();
     }
 
@@ -81,10 +73,19 @@ class ApplicationResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListApplications::route('/'),
+            'index'  => Pages\ListApplications::route('/'),
             'create' => Pages\CreateApplication::route('/create'),
-            'view' => Pages\ViewApplication::route('/{record}'),
-            'edit' => Pages\EditApplication::route('/{record}/edit'),
+            'view'   => Pages\ViewApplication::route('/{record}'),
+            'edit'   => Pages\EditApplication::route('/{record}/edit'),
         ];
+    }
+
+    protected static function scopeToUserAccounts(Builder $query): Builder
+    {
+        return $query->whereHas('accounts', function ($q) {
+            $q->whereHas('users', function ($userQuery) {
+                $userQuery->where('users.id', auth()->id());
+            });
+        });
     }
 }

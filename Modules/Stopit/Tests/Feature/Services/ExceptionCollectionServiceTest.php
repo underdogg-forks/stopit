@@ -31,10 +31,10 @@ class ExceptionCollectionServiceTest extends TestCase
     public function it_creates_new_exception_record(): void
     {
         /* Arrange */
-        $account = Account::factory()->create();
+        $account     = Account::factory()->create();
         $application = Application::factory()->create();
         $application->accounts()->attach($account->id);
-        
+
         $data = new ExceptionData();
         $data->setExceptionClass('RuntimeException')
             ->setMessage('Test error')
@@ -48,11 +48,11 @@ class ExceptionCollectionServiceTest extends TestCase
         $this->assertEquals('RuntimeException', $exception->exception_class);
         $this->assertEquals('Test error', $exception->message);
         $this->assertEquals(1, $exception->occurrence_count);
-        
+
         $this->assertDatabaseHas('exceptions', [
-            'application_id' => $application->id,
-            'exception_class' => 'RuntimeException',
-            'message' => 'Test error',
+            'application_id'   => $application->id,
+            'exception_class'  => 'RuntimeException',
+            'message'          => 'Test error',
             'occurrence_count' => 1,
         ]);
     }
@@ -61,10 +61,10 @@ class ExceptionCollectionServiceTest extends TestCase
     public function it_increments_occurrence_count_for_same_fingerprint(): void
     {
         /* Arrange */
-        $account = Account::factory()->create();
+        $account     = Account::factory()->create();
         $application = Application::factory()->create();
         $application->accounts()->attach($account->id);
-        
+
         $data = new ExceptionData();
         $data->setExceptionClass('RuntimeException')
             ->setMessage('Same error')
@@ -84,15 +84,15 @@ class ExceptionCollectionServiceTest extends TestCase
     public function it_creates_separate_records_for_different_messages(): void
     {
         /* Arrange */
-        $account = Account::factory()->create();
+        $account     = Account::factory()->create();
         $application = Application::factory()->create();
         $application->accounts()->attach($account->id);
-        
+
         $data1 = new ExceptionData();
         $data1->setExceptionClass('RuntimeException')
             ->setMessage('Error 1')
             ->setSeverity('error');
-            
+
         $data2 = new ExceptionData();
         $data2->setExceptionClass('RuntimeException')
             ->setMessage('Error 2')
@@ -111,12 +111,12 @@ class ExceptionCollectionServiceTest extends TestCase
     public function it_marks_exception_as_resolved(): void
     {
         /* Arrange */
-        $account = Account::factory()->create();
+        $account     = Account::factory()->create();
         $application = Application::factory()->create();
         $application->accounts()->attach($account->id);
         $exception = ExceptionRecord::factory()->create([
             'application_id' => $application->id,
-            'is_resolved' => false,
+            'is_resolved'    => false,
         ]);
 
         /* Act */
@@ -125,7 +125,7 @@ class ExceptionCollectionServiceTest extends TestCase
         /* Assert */
         $this->assertTrue($result);
         $this->assertDatabaseHas('exceptions', [
-            'id' => $exception->id,
+            'id'          => $exception->id,
             'is_resolved' => true,
         ]);
     }
@@ -134,10 +134,10 @@ class ExceptionCollectionServiceTest extends TestCase
     public function it_throws_exception_when_exception_class_is_empty(): void
     {
         /* Arrange */
-        $account = Account::factory()->create();
+        $account     = Account::factory()->create();
         $application = Application::factory()->create();
         $application->accounts()->attach($account->id);
-        
+
         $data = new ExceptionData();
         $data->setExceptionClass('')
             ->setMessage('Test error')
@@ -146,7 +146,7 @@ class ExceptionCollectionServiceTest extends TestCase
         /* Act & Assert */
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Exception class is required');
-        
+
         $this->service->reportException($application->id, $data);
     }
 
@@ -154,22 +154,22 @@ class ExceptionCollectionServiceTest extends TestCase
     public function it_returns_grouped_exceptions(): void
     {
         /* Arrange */
-        $account = Account::factory()->create();
+        $account     = Account::factory()->create();
         $application = Application::factory()->create();
         $application->accounts()->attach($account->id);
-        
+
         ExceptionRecord::factory()->count(5)->create([
             'application_id' => $application->id,
-            'is_resolved' => false,
+            'is_resolved'    => false,
         ]);
-        
+
         ExceptionRecord::factory()->count(2)->create([
             'application_id' => $application->id,
-            'is_resolved' => true,
+            'is_resolved'    => true,
         ]);
 
         /* Act */
-        $allExceptions = $this->service->getGroupedExceptions($application->id, false);
+        $allExceptions  = $this->service->getGroupedExceptions($application->id, false);
         $unresolvedOnly = $this->service->getGroupedExceptions($application->id, true);
 
         /* Assert */

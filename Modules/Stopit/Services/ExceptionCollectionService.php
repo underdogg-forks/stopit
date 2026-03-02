@@ -2,6 +2,7 @@
 
 namespace Modules\Stopit\Services;
 
+use DB;
 use Illuminate\Support\Collection;
 use InvalidArgumentException;
 use Modules\Stopit\DTOs\ExceptionData;
@@ -25,7 +26,7 @@ class ExceptionCollectionService
         }
 
         // Use database transaction to handle race condition with unique constraint
-        return \DB::transaction(function () use ($applicationId, $data) {
+        return DB::transaction(function () use ($applicationId, $data) {
             $existing = $this->repository->findByFingerprint(
                 $applicationId,
                 $data->getExceptionClass(),
