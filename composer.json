@@ -1,8 +1,8 @@
 {
     "name": "laravel/laravel",
     "type": "project",
-    "description": "",
-    "keywords": [],
+    "description": "Exception Monitoring SaaS Platform",
+    "keywords": ["laravel", "framework", "monitoring", "exceptions"],
     "license": "MIT",
     "config": {
         "optimize-autoloader": true,
