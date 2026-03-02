@@ -15,7 +15,19 @@ class CreateApplication extends CreateRecord
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         // Override account_id with current user's first account for security
-        $data['account_id'] = auth()->user()->accounts()->first()->id;
+        $user = auth()->user();
+        
+        if (! $user) {
+            throw new \RuntimeException('User must be authenticated to create an application.');
+        }
+        
+        $firstAccount = $user->accounts()->orderBy('id')->first();
+        
+        if (! $firstAccount) {
+            throw new \RuntimeException('User must belong to at least one account to create an application.');
+        }
+        
+        $data['account_id'] = $firstAccount->id;
         
         return $data;
     }

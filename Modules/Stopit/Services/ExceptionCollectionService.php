@@ -24,17 +24,37 @@ class ExceptionCollectionService
             throw new InvalidArgumentException('Message is required');
         }
 
-        $existing = $this->repository->findByFingerprint(
-            $applicationId,
-            $data->getExceptionClass(),
-            $data->getMessage()
-        );
+        // Use database transaction to handle race condition with unique constraint
+        return \DB::transaction(function () use ($applicationId, $data) {
+            $existing = $this->repository->findByFingerprint(
+                $applicationId,
+                $data->getExceptionClass(),
+                $data->getMessage()
+            );
 
-        if ($existing) {
-            return $this->repository->incrementOccurrence($existing);
-        }
+            if ($existing) {
+                return $this->repository->incrementOccurrence($existing);
+            }
 
-        return $this->repository->insert($applicationId, $data);
+            try {
+                return $this->repository->insert($applicationId, $data);
+            } catch (\Illuminate\Database\QueryException $e) {
+                // If unique constraint violation occurs, retry finding the record
+                if ($e->getCode() === '23000' || str_contains($e->getMessage(), 'Duplicate entry')) {
+                    $existing = $this->repository->findByFingerprint(
+                        $applicationId,
+                        $data->getExceptionClass(),
+                        $data->getMessage()
+                    );
+
+                    if ($existing) {
+                        return $this->repository->incrementOccurrence($existing);
+                    }
+                }
+
+                throw $e;
+            }
+        });
     }
 
     public function markAsResolved(int $exceptionId): bool
