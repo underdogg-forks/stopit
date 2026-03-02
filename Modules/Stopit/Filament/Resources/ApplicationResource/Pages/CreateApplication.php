@@ -14,6 +14,14 @@ class CreateApplication extends CreateRecord
 
     protected function mutateFormDataBeforeCreate(array $data): array
     {
+        // Override account_id with current user's first account for security
+        $data['account_id'] = auth()->user()->accounts()->first()->id;
+        
+        return $data;
+    }
+
+    protected function handleRecordCreation(array $data): \Illuminate\Database\Eloquent\Model
+    {
         $applicationData = new ApplicationData();
         $applicationData->setAccountId($data['account_id'])
             ->setName($data['name'])
@@ -29,16 +37,7 @@ class CreateApplication extends CreateRecord
             ->persistent()
             ->send();
 
-        return [
-            'account_id' => $result['application']->account_id,
-            'name' => $result['application']->name,
-            'slug' => $result['application']->slug,
-            'api_token' => $result['application']->api_token,
-        ];
+        return $result['application'];
     }
 
-    protected function afterCreate(): void
-    {
-        $this->redirect(ApplicationResource::getUrl('index'));
-    }
 }

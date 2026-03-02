@@ -29,6 +29,7 @@ return new class () extends Migration {
             $table->timestamp('last_occurred_at')->nullable();
             $table->timestamps();
 
+            $table->unique(['application_id', 'exception_class', 'message'], 'uniq_app_class_message');
             $table->index(['application_id', 'exception_class'], 'idx_app_class');
             $table->index(['application_id', 'is_resolved', 'last_occurred_at'], 'idx_app_resolved_last');
             $table->index(['application_id', 'severity'], 'idx_app_severity');

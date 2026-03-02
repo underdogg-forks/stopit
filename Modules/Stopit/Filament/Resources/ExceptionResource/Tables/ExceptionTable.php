@@ -31,7 +31,7 @@ class ExceptionTable
                 
             TextColumn::make('severity')
                 ->badge()
-                ->color(fn (string $state): string => match ($state) {
+                ->color(fn ($state): string => match ($state instanceof \Modules\Core\Enums\Severity ? $state->value : $state) {
                     'info' => 'info',
                     'warning' => 'warning',
                     'error' => 'danger',
@@ -66,7 +66,9 @@ class ExceptionTable
                     }
                     
                     return $query->whereHas('application', function (Builder $q) {
-                        $q->forAccount(auth()->user()->account_id);
+                        $q->whereHas('accounts.users', function ($userQuery) {
+                            $userQuery->where('users.id', auth()->id());
+                        });
                     });
                 }),
                 

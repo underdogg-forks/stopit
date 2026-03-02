@@ -40,11 +40,13 @@ class ApplicationService
         $hashedToken = $this->hashToken($plainToken);
 
         $application = $this->repository->insert(
-            $data->getAccountId(),
             $data->getName(),
             $data->getSlug(),
             $hashedToken
         );
+
+        // Attach application to the account
+        $application->accounts()->attach($data->getAccountId());
 
         return [
             'application' => $application,
@@ -57,7 +59,11 @@ class ApplicationService
         $plainToken  = $this->generateToken();
         $hashedToken = $this->hashToken($plainToken);
 
-        $this->repository->updateToken($applicationId, $hashedToken);
+        $success = $this->repository->updateToken($applicationId, $hashedToken);
+
+        if (!$success) {
+            throw new \RuntimeException("Failed to regenerate token for application ID: {$applicationId}");
+        }
 
         return $plainToken;
     }

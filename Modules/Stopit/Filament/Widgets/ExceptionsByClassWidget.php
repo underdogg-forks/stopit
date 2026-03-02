@@ -45,9 +45,11 @@ class ExceptionsByClassWidget extends ChartWidget
         $selectedAppId = $filters['applicationId'] ?? $this->applicationId;
         
         if ($selectedAppId) {
-            $userAccountId = auth()->user()->account_id;
+            // Verify user has access to this application
             $application = \Modules\Stopit\Models\Application::where('id', $selectedAppId)
-                ->forAccount($userAccountId)
+                ->whereHas('accounts.users', function ($q) {
+                    $q->where('users.id', auth()->id());
+                })
                 ->first();
             
             if ($application) {

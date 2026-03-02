@@ -18,12 +18,14 @@ class StopitSeeder extends Seeder
             'slug' => 'acme-corp',
         ]);
 
-        User::create([
-            'account_id' => $account->id,
+        $user = User::create([
             'name'       => 'Admin User',
             'email'      => 'admin@acme.test',
             'password'   => Hash::make('password'),
         ]);
+
+        // Attach user to account
+        $user->accounts()->attach($account->id, ['role' => 'owner']);
 
         $applications = [
             ['name' => 'GitMan', 'slug' => 'gitman'],
@@ -39,12 +41,14 @@ class StopitSeeder extends Seeder
             $plainToken  = Str::random(64);
             $hashedToken = hash('sha256', $plainToken);
 
-            Application::create([
-                'account_id' => $account->id,
+            $application = Application::create([
                 'name'       => $appData['name'],
                 'slug'       => $appData['slug'],
                 'api_token'  => $hashedToken,
             ]);
+
+            // Attach application to account
+            $application->accounts()->attach($account->id);
 
             $this->command->info("{$appData['name']}: {$plainToken}");
         }

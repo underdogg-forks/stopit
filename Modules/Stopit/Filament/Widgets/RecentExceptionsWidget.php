@@ -17,19 +17,24 @@ class RecentExceptionsWidget extends BaseWidget
 
     public function table(Table $table): Table
     {
-        $service = app(DashboardService::class);
-        
         $applicationId = $this->resolveApplicationId();
         
         if ($applicationId === 0) {
             $query = \Modules\Stopit\Models\ExceptionRecord::query()
                 ->whereHas('application', function ($q) {
-                    $q->forAccount(auth()->user()->account_id);
+                    $q->whereHas('accounts', function ($accountQuery) {
+                        $accountQuery->whereHas('users', function ($userQuery) {
+                            $userQuery->where('users.id', auth()->id());
+                        });
+                    });
                 })
                 ->orderBy('last_occurred_at', 'desc')
                 ->limit(10);
         } else {
-            $query = $service->getRecentExceptions($applicationId);
+            $query = \Modules\Stopit\Models\ExceptionRecord::query()
+                ->where('application_id', $applicationId)
+                ->orderBy('last_occurred_at', 'desc')
+                ->limit(10);
         }
         
         return $table
@@ -53,9 +58,11 @@ class RecentExceptionsWidget extends BaseWidget
         $selectedAppId = $filters['applicationId'] ?? $this->applicationId;
         
         if ($selectedAppId) {
-            $userAccountId = auth()->user()->account_id;
+            // Verify user has access to this application
             $application = \Modules\Stopit\Models\Application::where('id', $selectedAppId)
-                ->forAccount($userAccountId)
+                ->whereHas('accounts.users', function ($q) {
+                    $q->where('users.id', auth()->id());
+                })
                 ->first();
             
             if ($application) {
