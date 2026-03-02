@@ -23,10 +23,6 @@ class ApplicationTable
                 ->searchable()
                 ->sortable(),
                 
-            TextColumn::make('account.name')
-                ->label('Account')
-                ->sortable(),
-                
             TextColumn::make('created_at')
                 ->dateTime()
                 ->sortable(),

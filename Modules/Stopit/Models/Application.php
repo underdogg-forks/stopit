@@ -4,8 +4,9 @@ namespace Modules\Stopit\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Modules\Core\Traits\BelongsToAccount;
+use Modules\Core\Traits\BelongsToManyAccounts;
 
 class Application extends Model
 {
@@ -13,7 +14,6 @@ class Application extends Model
     use HasFactory;
 
     protected $fillable = [
-        'account_id',
         'name',
         'slug',
         'api_token',
@@ -22,6 +22,12 @@ class Application extends Model
     protected $hidden = [
         'api_token',
     ];
+
+    public function accounts(): BelongsToMany
+    {
+        return $this->belongsToMany(Account::class, 'account_application')
+            ->withTimestamps();
+    }
 
     public function exceptions(): HasMany
     {

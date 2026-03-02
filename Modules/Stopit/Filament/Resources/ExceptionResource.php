@@ -34,7 +34,9 @@ class ExceptionResource extends Resource
             ->defaultSort('last_occurred_at', 'desc')
             ->modifyQueryUsing(function ($query) {
                 return $query->whereHas('application', function ($q) {
-                    $q->forAccount(auth()->user()->account_id);
+                    $q->whereHas('accounts.users', function ($userQuery) {
+                        $userQuery->where('users.id', auth()->id());
+                    });
                 });
             });
     }

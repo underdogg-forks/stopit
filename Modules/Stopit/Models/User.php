@@ -5,9 +5,9 @@ namespace Modules\Stopit\Models;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Modules\Core\Traits\BelongsToAccount;
 
 class User extends Authenticatable implements FilamentUser
 {
@@ -16,7 +16,6 @@ class User extends Authenticatable implements FilamentUser
     use Notifiable;
 
     protected $fillable = [
-        'account_id',
         'name',
         'email',
         'password',
@@ -26,6 +25,20 @@ class User extends Authenticatable implements FilamentUser
         'password',
         'remember_token',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'password' => 'hashed',
+        ];
+    }
+
+    public function accounts(): BelongsToMany
+    {
+        return $this->belongsToMany(Account::class, 'workspaces')
+            ->withPivot('role')
+            ->withTimestamps();
+    }
 
     public function canAccessPanel(Panel $panel): bool
     {

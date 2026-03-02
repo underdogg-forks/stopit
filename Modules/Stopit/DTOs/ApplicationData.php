@@ -4,11 +4,11 @@ namespace Modules\Stopit\DTOs;
 
 class ApplicationData
 {
-    private int $accountId;
+    private int $accountId = 0;
 
-    private string $name;
+    private string $name = '';
 
-    private string $slug;
+    private string $slug = '';
 
     public function getAccountId(): int
     {

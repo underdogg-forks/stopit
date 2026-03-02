@@ -12,10 +12,9 @@ class ApplicationRepository implements ApplicationRepositoryContract
         return Application::where('api_token', $hashedToken)->first();
     }
 
-    public function insert(int $accountId, string $name, string $slug, string $hashedToken): Application
+    public function insert(string $name, string $slug, string $hashedToken): Application
     {
         return Application::create([
-            'account_id' => $accountId,
             'name'       => $name,
             'slug'       => $slug,
             'api_token'  => $hashedToken,

@@ -18,9 +18,14 @@ class Dashboard extends BaseDashboard
                 Select::make('applicationId')
                     ->label('Application')
                     ->options(function () {
-                        return auth()->user()
-                            ->account
-                            ->applications()
+                        $user = auth()->user();
+                        $firstAccount = $user->accounts()->first();
+                        
+                        if (!$firstAccount) {
+                            return [];
+                        }
+                        
+                        return $firstAccount->applications()
                             ->pluck('name', 'id')
                             ->toArray();
                     })

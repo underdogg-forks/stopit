@@ -2,7 +2,7 @@
 
 namespace Modules\Stopit\Filament\Resources\ApplicationResource\Forms;
 
-use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\TextInput;
 use Illuminate\Support\Str;
 
@@ -11,10 +11,8 @@ class ApplicationForm
     public static function schema(): array
     {
         return [
-            Select::make('account_id')
-                ->relationship('account', 'name')
-                ->required()
-                ->default(fn () => auth()->user()->account_id),
+            Hidden::make('account_id')
+                ->default(fn () => auth()->user()->accounts()->first()?->id),
                 
             TextInput::make('name')
                 ->required()

@@ -28,7 +28,9 @@ class ApplicationResource extends Resource
         return $table
             ->columns(ApplicationTable::columns())
             ->actions(ApplicationTable::actions())
-            ->modifyQueryUsing(fn ($query) => $query->forAccount(auth()->user()->account_id));
+            ->modifyQueryUsing(fn ($query) => $query->whereHas('accounts.users', function ($q) {
+                $q->where('users.id', auth()->id());
+            }));
     }
 
     public static function getRelations(): array

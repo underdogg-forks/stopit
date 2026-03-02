@@ -4,10 +4,9 @@ namespace Modules\Stopit\DTOs;
 
 class ExceptionData
 {
-    private string $exceptionClass;
+    private string $exceptionClass = '';
 
-    private string $message;
-
+    private string $message = '';
     private ?string $file = null;
 
     private ?int $line = null;
