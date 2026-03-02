@@ -15,6 +15,8 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Modules\Stopit\Http\Middleware\IdentifyTenant;
+use Modules\Stopit\Http\Middleware\EnforceTenantAccess;
 use Modules\Stopit\Filament\Pages\Dashboard;
 use Modules\Stopit\Filament\Resources\ApplicationResource;
 use Modules\Stopit\Filament\Resources\ExceptionResource;
@@ -31,6 +33,21 @@ class StopitPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login()
+            ->domain(function () {
+                // Support both main domain and tenant subdomains
+                $host = request()->getHost();
+                $parts = explode('.', $host);
+                
+                // Return the full domain (subdomain.stopit.dev or stopit.dev)
+                return $host;
+            })
+            ->userMenuItems([
+                'switch-tenant' => \Filament\Navigation\MenuItem::make()
+                    ->label('Switch Workspace')
+                    ->icon('heroicon-o-arrow-path')
+                    ->url(fn () => route('tenant.switcher'))
+                    ->visible(fn () => auth()->check() && auth()->user()->accounts()->count() > 1),
+            ])
             ->colors([
                 'primary' => Color::hex('#5E81AC'),
                 'gray' => Color::hex('#4C566A'),
@@ -60,9 +77,11 @@ class StopitPanelProvider extends PanelProvider
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
+                IdentifyTenant::class,
             ])
             ->authMiddleware([
                 Authenticate::class,
+                EnforceTenantAccess::class,
             ]);
     }
 }
