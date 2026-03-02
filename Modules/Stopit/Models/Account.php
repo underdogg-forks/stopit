@@ -13,6 +13,12 @@ class Account extends Model
     protected $fillable = [
         'name',
         'slug',
+        'domain',
+        'is_active',
+    ];
+
+    protected $casts = [
+        'is_active' => 'boolean',
     ];
 
     public function applications(): BelongsToMany
