@@ -19,6 +19,12 @@ class StopitServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->loadMigrationsFrom(__DIR__ . '/Database/migrations');
-        $this->loadRoutesFrom(__DIR__ . '/routes/api.php');
+
+        $this->app->make('router')->group([
+            'prefix' => 'api',
+            'middleware' => ['api'],
+        ], function ($router) {
+            require __DIR__ . '/routes/api.php';
+        });
     }
 }

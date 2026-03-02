@@ -41,11 +41,17 @@
             "Database\\Factories\\": "database/factories/",
             "Database\\Seeders\\": "database/seeders/",
             "Modules\\": "Modules/"
-        }
+        },
+        "classmap": [
+            "Modules/Stopit/Database/seeders",
+            "Modules/Stopit/Database/factories"
+        ]
     },
     "autoload-dev": {
         "psr-4": {
-            "Tests\\": "tests/"
+            "Tests\\": "tests/",
+            "Tests\\Feature\\Api\\": "Modules/Stopit/Tests/Feature/Api/",
+            "Tests\\Feature\\Services\\": "Modules/Stopit/Tests/Feature/Services/"
         }
     },
     "scripts": {
