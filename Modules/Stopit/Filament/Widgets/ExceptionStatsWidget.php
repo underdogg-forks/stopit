@@ -15,7 +15,8 @@ class ExceptionStatsWidget extends BaseWidget
         $service = app(DashboardService::class);
         
         $applicationId = $this->resolveApplicationId();
-        $counts = $service->getCountBySeverity($applicationId);
+        $accountId = $this->getUserAccountId();
+        $counts = $service->getCountBySeverity($applicationId, $accountId);
         
         return [
             Stat::make('Info', $counts['info'])
@@ -27,6 +28,17 @@ class ExceptionStatsWidget extends BaseWidget
             Stat::make('Critical', $counts['critical'])
                 ->color('danger'),
         ];
+    }
+
+    protected function getUserAccountId(): ?int
+    {
+        $user = auth()->user();
+        if (!$user) {
+            return null;
+        }
+        
+        $account = $user->accounts()->first();
+        return $account?->id;
     }
 
     protected function resolveApplicationId(): int

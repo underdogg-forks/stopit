@@ -18,7 +18,8 @@ class ExceptionsByClassWidget extends ChartWidget
         $service = app(DashboardService::class);
         
         $applicationId = $this->resolveApplicationId();
-        $counts = $service->getCountByClass($applicationId);
+        $accountId = $this->getUserAccountId();
+        $counts = $service->getCountByClass($applicationId, $accountId);
         
         $labels = array_keys($counts);
         $data = array_values($counts);
@@ -37,6 +38,17 @@ class ExceptionsByClassWidget extends ChartWidget
     protected function getType(): string
     {
         return 'bar';
+    }
+
+    protected function getUserAccountId(): ?int
+    {
+        $user = auth()->user();
+        if (!$user) {
+            return null;
+        }
+        
+        $account = $user->accounts()->first();
+        return $account?->id;
     }
 
     protected function resolveApplicationId(): int

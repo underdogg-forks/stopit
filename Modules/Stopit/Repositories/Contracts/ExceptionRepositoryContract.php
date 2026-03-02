@@ -24,4 +24,10 @@ interface ExceptionRepositoryContract extends RepositoryContract
     public function getCountBySeverity(int $applicationId): array;
 
     public function getCountByClass(int $applicationId): array;
+
+    public function getCountBySeverityForAccount(int $accountId): array;
+    
+    public function getCountByClassForAccount(int $accountId): array;
+    
+    public function getRecentForAccount(int $accountId, int $limit = 10): Collection;
 }
