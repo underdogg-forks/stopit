@@ -1,9 +1,6 @@
 <?php
 
-use Illuminate\Support\Str;
-
 return [
-
     /*
     |--------------------------------------------------------------------------
     | Default Session Driver
@@ -18,7 +15,7 @@ return [
     |
     */
 
-    'driver' => env('SESSION_DRIVER', 'database'),
+    'driver' => env('SESSION_DRIVER', 'file'),
 
     /*
     |--------------------------------------------------------------------------
@@ -127,10 +124,7 @@ return [
     |
     */
 
-    'cookie' => env(
-        'SESSION_COOKIE',
-        Str::slug((string) env('APP_NAME', 'laravel')).'-session'
-    ),
+    'cookie' => env('SESSION_COOKIE', Illuminate\Support\Str::slug(env('APP_NAME', 'laravel'), '_') . '_session'),
 
     /*
     |--------------------------------------------------------------------------
@@ -213,5 +207,4 @@ return [
     */
 
     'partitioned' => env('SESSION_PARTITIONED_COOKIE', false),
-
 ];
