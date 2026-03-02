@@ -18,13 +18,13 @@
     "autoload": {
         "psr-4": {
             "Modules\\Stopit\\": "src/",
-            "Modules\\Stopit\\Database\\Factories\\": "database/factories/",
-            "Modules\\Stopit\\Database\\Seeders\\": "database/seeders/"
+            "Modules\\Stopit\\Database\\Factories\\": "Database/Factories/",
+            "Modules\\Stopit\\Database\\Seeders\\": "Database/Seeders/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Modules\\Stopit\\Tests\\": "tests/"
+            "Modules\\Stopit\\Tests\\": "Tests/"
         }
     }
 }

@@ -1,12 +1,12 @@
 <?php
 
-namespace Stopit\src\Providers;
+namespace Modules\Stopit\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use Stopit\src\Providers\Repositories\ApplicationRepository;
-use Stopit\src\Providers\Repositories\Contracts\ApplicationRepositoryContract;
-use Stopit\src\Providers\Repositories\Contracts\ExceptionRepositoryContract;
-use Stopit\src\Providers\Repositories\ExceptionRepository;
+use Modules\Stopit\Providers\Repositories\ApplicationRepository;
+use Modules\Modules\Stopit\Contracts\ApplicationRepositoryContract;
+use Modules\Modules\Stopit\Contracts\ExceptionRepositoryContract;
+use Modules\Stopit\Providers\Repositories\ExceptionRepository;
 
 class StopitServiceProvider extends ServiceProvider
 {
@@ -18,7 +18,7 @@ class StopitServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        $this->loadMigrationsFrom(__DIR__ . '/database/migrations');
+        $this->loadMigrationsFrom(__DIR__ . '/Database/Migrations');
 
         $this->loadViewsFrom(__DIR__ . '/resources/views', 'stopit');
 

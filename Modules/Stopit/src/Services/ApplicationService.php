@@ -1,12 +1,11 @@
 <?php
 
-namespace Stopit\src\Providers\Services;
+namespace Modules\Stopit\Services;
 
 use Illuminate\Support\Str;
 use InvalidArgumentException;
-use Stopit\src\Providers\Models\Application;
-use Stopit\src\Providers\Repositories\Contracts\ApplicationRepositoryContract;
-use Stopit\src\Providers\src\DTOs\ApplicationData;
+use Modules\Stopit\Models\Application;
+use Modules\Stopit\Repositories\Contracts\ApplicationRepositoryContract;
 use RuntimeException;
 
 class ApplicationService
@@ -31,7 +30,7 @@ class ApplicationService
         return $this->repository->findByToken($hashedToken);
     }
 
-    public function createApplication(ApplicationData $data): array
+    public function createApplication($data): array
     {
         if (empty($data->getName()) || empty($data->getSlug())) {
             throw new InvalidArgumentException('Name and slug are required');

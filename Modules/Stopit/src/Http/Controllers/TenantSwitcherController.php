@@ -1,6 +1,6 @@
 <?php
 
-namespace Stopit\src\Providers\src\Http\Controllers;
+namespace Modules\Stopit\Providers\src\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;

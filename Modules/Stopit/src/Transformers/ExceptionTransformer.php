@@ -1,9 +1,9 @@
 <?php
 
-namespace Stopit\src\Providers\src\Transformers;
+namespace Modules\Stopit\Providers\src\Transformers;
 
 use Illuminate\Http\Request;
-use Stopit\src\Providers\src\DTOs\ExceptionData;
+use Modules\Stopit\Providers\src\DTOs\ExceptionData;
 
 class ExceptionTransformer
 {

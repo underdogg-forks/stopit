@@ -1,6 +1,6 @@
 <?php
 
-namespace Stopit\src\Providers\Models;
+namespace Modules\Stopit\Models;
 
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
@@ -8,10 +8,10 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Modules\Stopit\Models\Account;
 
 class User extends Authenticatable implements FilamentUser
 {
-    use BelongsToAccount;
     use HasFactory;
     use Notifiable;
 
@@ -40,14 +40,7 @@ class User extends Authenticatable implements FilamentUser
 
     protected static function newFactory()
     {
-        return \Stopit\src\Providers\Database\factories\UserFactory::new();
-    }
-
-    protected function casts(): array
-    {
-        return [
-            'password' => 'hashed',
-        ];
+        return \Modules\Stopit\Database\Factories\UserFactory::new();
     }
 
     protected function casts(): array

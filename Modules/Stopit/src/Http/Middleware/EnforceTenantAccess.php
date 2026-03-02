@@ -1,6 +1,6 @@
 <?php
 
-namespace Stopit\src\Providers\src\Http\Middleware;
+namespace Modules\Stopit\Providers\src\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;

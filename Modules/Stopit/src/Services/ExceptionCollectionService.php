@@ -1,13 +1,12 @@
 <?php
 
-namespace Stopit\src\Providers\Services;
+namespace Modules\Stopit\Services;
 
-use DB;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Collection;
 use InvalidArgumentException;
-use Stopit\src\Providers\Models\ExceptionRecord;
-use Stopit\src\Providers\Repositories\Contracts\ExceptionRepositoryContract;
-use Stopit\src\Providers\src\DTOs\ExceptionData;
+use Modules\Stopit\Models\ExceptionRecord;
+use Modules\Stopit\Repositories\Contracts\ExceptionRepositoryContract;
 
 class ExceptionCollectionService
 {
@@ -15,7 +14,7 @@ class ExceptionCollectionService
         private ExceptionRepositoryContract $repository
     ) {}
 
-    public function reportException(int $applicationId, ExceptionData $data): ExceptionRecord
+    public function reportException(int $applicationId, $data): ExceptionRecord
     {
         if (empty($data->getExceptionClass())) {
             throw new InvalidArgumentException('Exception class is required');
@@ -25,7 +24,7 @@ class ExceptionCollectionService
             throw new InvalidArgumentException('Message is required');
         }
 
-        // Use database transaction to handle race condition with unique constraint
+        // Use Database transaction to handle race condition with unique constraint
         return DB::transaction(function () use ($applicationId, $data) {
             $existing = $this->repository->findByFingerprint(
                 $applicationId,

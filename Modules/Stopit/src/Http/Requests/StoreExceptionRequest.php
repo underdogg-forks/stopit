@@ -1,6 +1,6 @@
 <?php
 
-namespace Stopit\src\Providers\src\Http\Requests;
+namespace Modules\Stopit\Providers\src\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Modules\Core\Enums\Severity;

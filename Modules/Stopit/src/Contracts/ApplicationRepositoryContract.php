@@ -1,9 +1,9 @@
 <?php
 
-namespace Stopit\src\Providers\Repositories\Contracts;
+namespace Modules\Stopit\Contracts;
 
 use Modules\Core\Contracts\RepositoryContract;
-use Stopit\src\Providers\Models\Application;
+use Modules\Stopit\Providers\Models\Application;
 
 interface ApplicationRepositoryContract extends RepositoryContract
 {

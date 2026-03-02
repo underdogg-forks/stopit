@@ -48,7 +48,7 @@ curl -X POST http://localhost:8000/api/v1/exceptions \
     "line": 42,
     "severity": "critical",
     "context": {
-      "database": "primary",
+      "Database": "primary",
       "retry_count": 3
     }
   }'
@@ -74,7 +74,7 @@ $response = $client->post('/api/v1/exceptions', [
         'line' => 42,
         'severity' => 'critical',
         'context' => [
-            'database' => 'primary',
+            'Database' => 'primary',
             'retry_count' => 3,
         ],
     ],
