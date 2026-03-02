@@ -41,15 +41,23 @@ class CreateApplication extends CreateRecord
 
         $service = app(ApplicationService::class);
         $result = $service->createApplication($applicationData);
+        
+        // Store the token in session to display it on the view page
+        session()->flash('revealed_token', $result['plain_token']);
 
         Notification::make()
-            ->title('Application Created')
-            ->body("API Token (save this, it won't be shown again): {$result['plain_token']}")
+            ->title('Application Created Successfully')
+            ->body('Your API token is displayed on the next page. Make sure to copy it to a secure location.')
             ->success()
-            ->persistent()
+            ->duration(8000)
             ->send();
 
         return $result['application'];
     }
-
+    
+    protected function getRedirectUrl(): string
+    {
+        // Redirect to the view page to show the token
+        return $this->getResource()::getUrl('view', ['record' => $this->record]);
+    }
 }
