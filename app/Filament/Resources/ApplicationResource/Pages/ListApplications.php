@@ -2,8 +2,8 @@
 
 namespace App\Providers\Resources\ApplicationResource\Pages;
 
-use Filament\Resources\Pages\ListRecords;
 use App\Providers\Resources\ApplicationResource;
+use Filament\Resources\Pages\ListRecords;
 
 class ListApplications extends ListRecords
 {

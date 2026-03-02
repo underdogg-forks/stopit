@@ -2,8 +2,8 @@
 
 namespace Modules\Stopit\Services;
 
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 use Modules\Stopit\Models\ExceptionRecord;
 use Modules\Stopit\Repositories\Contracts\ExceptionRepositoryContract;

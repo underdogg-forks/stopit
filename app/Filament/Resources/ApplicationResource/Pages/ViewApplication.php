@@ -2,12 +2,12 @@
 
 namespace App\Providers\Resources\ApplicationResource\Pages;
 
+use App\Providers\Resources\ApplicationResource;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Support\Enums\IconPosition;
 use Modules\Stopit\Providers\Services\ApplicationService;
-use App\Providers\Resources\ApplicationResource;
 
 class ViewApplication extends ViewRecord
 {

@@ -2,9 +2,9 @@
 
 namespace App\Providers\Widgets;
 
+use App\Providers\Traits\HasUserAccount;
 use Filament\Widgets\ChartWidget;
 use Modules\Stopit\Providers\Services\DashboardService;
-use App\Providers\Traits\HasUserAccount;
 
 class ExceptionsByClassWidget extends ChartWidget
 {
