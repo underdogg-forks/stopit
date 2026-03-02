@@ -31,7 +31,7 @@ class ApplicationServiceTest extends TestCase
     {
         /* Arrange */
         $account = Account::factory()->create();
-        $data = new ApplicationData();
+        $data    = new ApplicationData();
         $data->setAccountId($account->id)
             ->setName('Test App')
             ->setSlug('test-app');
@@ -43,16 +43,16 @@ class ApplicationServiceTest extends TestCase
         $this->assertArrayHasKey('application', $result);
         $this->assertArrayHasKey('plain_token', $result);
         $this->assertInstanceOf(Application::class, $result['application']);
-        $this->assertEquals(64, strlen($result['plain_token']));
-        
+        $this->assertEquals(64, mb_strlen($result['plain_token']));
+
         $this->assertDatabaseHas('applications', [
             'name' => 'Test App',
             'slug' => 'test-app',
         ]);
-        
+
         // Verify pivot relationship
         $this->assertDatabaseHas('account_application', [
-            'account_id' => $account->id,
+            'account_id'     => $account->id,
             'application_id' => $result['application']->id,
         ]);
     }
@@ -62,12 +62,12 @@ class ApplicationServiceTest extends TestCase
     {
         /* Arrange */
         $account = Account::factory()->create();
-        $data = new ApplicationData();
+        $data    = new ApplicationData();
         $data->setAccountId($account->id)
             ->setName('Test App')
             ->setSlug('test-app');
 
-        $result = $this->service->createApplication($data);
+        $result     = $this->service->createApplication($data);
         $plainToken = $result['plain_token'];
 
         /* Act */
@@ -109,22 +109,22 @@ class ApplicationServiceTest extends TestCase
     {
         /* Arrange */
         $account = Account::factory()->create();
-        $data = new ApplicationData();
+        $data    = new ApplicationData();
         $data->setAccountId($account->id)
             ->setName('Test App')
             ->setSlug('test-app');
 
-        $result = $this->service->createApplication($data);
-        $oldToken = $result['plain_token'];
+        $result      = $this->service->createApplication($data);
+        $oldToken    = $result['plain_token'];
         $application = $result['application'];
 
         /* Act */
         $newToken = $this->service->regenerateToken($application->id);
 
         /* Assert */
-        $this->assertEquals(64, strlen($newToken));
+        $this->assertEquals(64, mb_strlen($newToken));
         $this->assertNotEquals($oldToken, $newToken);
-        
+
         $this->assertNull($this->service->validateToken($oldToken));
         $this->assertInstanceOf(Application::class, $this->service->validateToken($newToken));
     }
@@ -134,7 +134,7 @@ class ApplicationServiceTest extends TestCase
     {
         /* Arrange */
         $account = Account::factory()->create();
-        $data = new ApplicationData();
+        $data    = new ApplicationData();
         $data->setAccountId($account->id)
             ->setName('')
             ->setSlug('test-slug');
@@ -142,7 +142,7 @@ class ApplicationServiceTest extends TestCase
         /* Act & Assert */
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Name and slug are required');
-        
+
         $this->service->createApplication($data);
     }
 }

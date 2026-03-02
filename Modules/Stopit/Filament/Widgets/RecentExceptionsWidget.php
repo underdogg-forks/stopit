@@ -5,20 +5,19 @@ namespace Modules\Stopit\Filament\Widgets;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
-use Modules\Stopit\Services\DashboardService;
 
 class RecentExceptionsWidget extends BaseWidget
 {
     public ?int $applicationId = null;
 
-    protected int | string | array $columnSpan = 'full';
+    protected int|string|array $columnSpan = 'full';
 
     protected static ?int $sort = 2;
 
     public function table(Table $table): Table
     {
         $applicationId = $this->resolveApplicationId();
-        
+
         if ($applicationId === 0) {
             $query = \Modules\Stopit\Models\ExceptionRecord::query()
                 ->whereHas('application', function ($q) {
@@ -36,7 +35,7 @@ class RecentExceptionsWidget extends BaseWidget
                 ->orderBy('last_occurred_at', 'desc')
                 ->limit(10);
         }
-        
+
         return $table
             ->query($query)
             ->columns([
@@ -54,9 +53,9 @@ class RecentExceptionsWidget extends BaseWidget
 
     protected function resolveApplicationId(): int
     {
-        $filters = $this->filters ?? [];
+        $filters       = $this->filters ?? [];
         $selectedAppId = $filters['applicationId'] ?? $this->applicationId;
-        
+
         if ($selectedAppId) {
             // Verify user has access to this application
             $application = \Modules\Stopit\Models\Application::where('id', $selectedAppId)
@@ -64,12 +63,12 @@ class RecentExceptionsWidget extends BaseWidget
                     $q->where('users.id', auth()->id());
                 })
                 ->first();
-            
+
             if ($application) {
                 return $application->id;
             }
         }
-        
+
         return 0;
     }
 }

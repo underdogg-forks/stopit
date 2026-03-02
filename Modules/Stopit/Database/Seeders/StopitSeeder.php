@@ -19,9 +19,9 @@ class StopitSeeder extends Seeder
         ]);
 
         $user = User::create([
-            'name'       => 'Admin User',
-            'email'      => 'admin@acme.test',
-            'password'   => Hash::make('password'),
+            'name'     => 'Admin User',
+            'email'    => 'admin@acme.test',
+            'password' => Hash::make('password'),
         ]);
 
         // Attach user to account
@@ -42,9 +42,9 @@ class StopitSeeder extends Seeder
             $hashedToken = hash('sha256', $plainToken);
 
             $application = Application::create([
-                'name'       => $appData['name'],
-                'slug'       => $appData['slug'],
-                'api_token'  => $hashedToken,
+                'name'      => $appData['name'],
+                'slug'      => $appData['slug'],
+                'api_token' => $hashedToken,
             ]);
 
             // Attach application to account

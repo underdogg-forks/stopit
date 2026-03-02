@@ -7,6 +7,7 @@ use InvalidArgumentException;
 use Modules\Stopit\DTOs\ApplicationData;
 use Modules\Stopit\Models\Application;
 use Modules\Stopit\Repositories\Contracts\ApplicationRepositoryContract;
+use RuntimeException;
 
 class ApplicationService
 {
@@ -61,8 +62,8 @@ class ApplicationService
 
         $success = $this->repository->updateToken($applicationId, $hashedToken);
 
-        if (!$success) {
-            throw new \RuntimeException("Failed to regenerate token for application ID: {$applicationId}");
+        if ( ! $success) {
+            throw new RuntimeException("Failed to regenerate token for application ID: {$applicationId}");
         }
 
         return $plainToken;

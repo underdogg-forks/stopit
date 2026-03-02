@@ -7,6 +7,7 @@ class ExceptionData
     private string $exceptionClass = '';
 
     private string $message = '';
+
     private ?string $file = null;
 
     private ?int $line = null;

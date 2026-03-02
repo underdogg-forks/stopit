@@ -3,7 +3,6 @@
 namespace Tests\Feature\Api;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Modules\Core\Enums\Severity;
 use Modules\Stopit\Models\Account;
 use Modules\Stopit\Models\Application;
 use Modules\Stopit\Models\ExceptionRecord;
@@ -21,8 +20,8 @@ class ExceptionCollectionTest extends TestCase
     public function it_accepts_valid_exception_with_bearer_token(): void
     {
         /* Arrange */
-        $account = Account::factory()->create();
-        $plainToken = 'test-token-12345678901234567890123456789012345678901234567890';
+        $account     = Account::factory()->create();
+        $plainToken  = 'test-token-12345678901234567890123456789012345678901234567890';
         $hashedToken = hash('sha256', $plainToken);
         $application = Application::factory()->create([
             'api_token' => $hashedToken,
@@ -31,10 +30,10 @@ class ExceptionCollectionTest extends TestCase
 
         $payload = [
             'exception_class' => 'RuntimeException',
-            'message' => 'Database connection failed',
-            'file' => '/app/Database.php',
-            'line' => 42,
-            'severity' => 'error',
+            'message'         => 'Database connection failed',
+            'file'            => '/app/Database.php',
+            'line'            => 42,
+            'severity'        => 'error',
         ];
 
         /* Act */
@@ -45,11 +44,11 @@ class ExceptionCollectionTest extends TestCase
         /* Assert */
         $response->assertStatus(201);
         $response->assertJsonStructure(['id', 'exception_class', 'message', 'created_at']);
-        
+
         $this->assertDatabaseHas('exceptions', [
-            'application_id' => $application->id,
+            'application_id'  => $application->id,
             'exception_class' => 'RuntimeException',
-            'message' => 'Database connection failed',
+            'message'         => 'Database connection failed',
         ]);
     }
 
@@ -59,7 +58,7 @@ class ExceptionCollectionTest extends TestCase
         /* Arrange */
         $payload = [
             'exception_class' => 'RuntimeException',
-            'message' => 'Test error',
+            'message'         => 'Test error',
         ];
 
         /* Act */
@@ -76,7 +75,7 @@ class ExceptionCollectionTest extends TestCase
         /* Arrange */
         $payload = [
             'exception_class' => 'RuntimeException',
-            'message' => 'Test error',
+            'message'         => 'Test error',
         ];
 
         /* Act */
@@ -93,8 +92,8 @@ class ExceptionCollectionTest extends TestCase
     public function it_returns_422_when_exception_class_is_missing(): void
     {
         /* Arrange */
-        $account = Account::factory()->create();
-        $plainToken = 'test-token-12345678901234567890123456789012345678901234567890';
+        $account     = Account::factory()->create();
+        $plainToken  = 'test-token-12345678901234567890123456789012345678901234567890';
         $hashedToken = hash('sha256', $plainToken);
         $application = Application::factory()->create([
             'api_token' => $hashedToken,
@@ -119,8 +118,8 @@ class ExceptionCollectionTest extends TestCase
     public function it_increments_occurrence_count_for_duplicate_exceptions(): void
     {
         /* Arrange */
-        $account = Account::factory()->create();
-        $plainToken = 'test-token-12345678901234567890123456789012345678901234567890';
+        $account     = Account::factory()->create();
+        $plainToken  = 'test-token-12345678901234567890123456789012345678901234567890';
         $hashedToken = hash('sha256', $plainToken);
         $application = Application::factory()->create([
             'api_token' => $hashedToken,
@@ -129,22 +128,22 @@ class ExceptionCollectionTest extends TestCase
 
         $payload = [
             'exception_class' => 'RuntimeException',
-            'message' => 'Same error',
-            'severity' => 'error',
+            'message'         => 'Same error',
+            'severity'        => 'error',
         ];
 
         /* Act */
         $this->postJson('/api/v1/exceptions', $payload, [
             'Authorization' => "Bearer {$plainToken}",
         ]);
-        
+
         $this->postJson('/api/v1/exceptions', $payload, [
             'Authorization' => "Bearer {$plainToken}",
         ]);
 
         /* Assert */
         $this->assertDatabaseCount('exceptions', 1);
-        
+
         $exception = ExceptionRecord::first();
         $this->assertEquals(2, $exception->occurrence_count);
     }

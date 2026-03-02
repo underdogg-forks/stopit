@@ -15,9 +15,9 @@ class ApplicationRepository implements ApplicationRepositoryContract
     public function insert(string $name, string $slug, string $hashedToken): Application
     {
         return Application::create([
-            'name'       => $name,
-            'slug'       => $slug,
-            'api_token'  => $hashedToken,
+            'name'      => $name,
+            'slug'      => $slug,
+            'api_token' => $hashedToken,
         ]);
     }
 

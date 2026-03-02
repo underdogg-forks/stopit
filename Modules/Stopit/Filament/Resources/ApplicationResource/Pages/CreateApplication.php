@@ -7,6 +7,7 @@ use Filament\Resources\Pages\CreateRecord;
 use Modules\Stopit\DTOs\ApplicationData;
 use Modules\Stopit\Filament\Resources\ApplicationResource;
 use Modules\Stopit\Services\ApplicationService;
+use RuntimeException;
 
 class CreateApplication extends CreateRecord
 {
@@ -16,19 +17,19 @@ class CreateApplication extends CreateRecord
     {
         // Override account_id with current user's first account for security
         $user = auth()->user();
-        
-        if (! $user) {
-            throw new \RuntimeException('User must be authenticated to create an application.');
+
+        if ( ! $user) {
+            throw new RuntimeException('User must be authenticated to create an application.');
         }
-        
+
         $firstAccount = $user->accounts()->orderBy('id')->first();
-        
-        if (! $firstAccount) {
-            throw new \RuntimeException('User must belong to at least one account to create an application.');
+
+        if ( ! $firstAccount) {
+            throw new RuntimeException('User must belong to at least one account to create an application.');
         }
-        
+
         $data['account_id'] = $firstAccount->id;
-        
+
         return $data;
     }
 
@@ -40,8 +41,8 @@ class CreateApplication extends CreateRecord
             ->setSlug($data['slug']);
 
         $service = app(ApplicationService::class);
-        $result = $service->createApplication($applicationData);
-        
+        $result  = $service->createApplication($applicationData);
+
         // Store the token in session to display it on the view page
         session()->flash('revealed_token', $result['plain_token']);
 
@@ -54,7 +55,7 @@ class CreateApplication extends CreateRecord
 
         return $result['application'];
     }
-    
+
     protected function getRedirectUrl(): string
     {
         // Redirect to the view page to show the token

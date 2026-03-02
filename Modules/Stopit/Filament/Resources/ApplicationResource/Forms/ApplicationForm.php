@@ -13,13 +13,13 @@ class ApplicationForm
         return [
             Hidden::make('account_id')
                 ->default(fn () => auth()->user()->accounts()->first()?->id),
-                
+
             TextInput::make('name')
                 ->required()
                 ->maxLength(255)
                 ->reactive()
                 ->afterStateUpdated(fn ($state, callable $set) => $set('slug', Str::slug($state))),
-                
+
             TextInput::make('slug')
                 ->required()
                 ->maxLength(255)

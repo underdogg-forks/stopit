@@ -13,12 +13,12 @@ class AccountFactory extends Factory
     public function definition(): array
     {
         $name = $this->faker->company();
-$slug = Str::slug($name);
+        $slug = Str::slug($name);
 
         return [
-            'name' => $name,
-            'slug' => $slug,
-            'domain' => $slug,
+            'name'      => $name,
+            'slug'      => $slug,
+            'domain'    => $slug,
             'is_active' => true,
         ];
     }

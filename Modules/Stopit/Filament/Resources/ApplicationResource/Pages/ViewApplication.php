@@ -11,19 +11,24 @@ use Modules\Stopit\Services\ApplicationService;
 
 class ViewApplication extends ViewRecord
 {
-    protected static string $resource = ApplicationResource::class;
-    
     public ?string $revealedToken = null;
-    
-    public function mount(int | string $record): void
+
+    protected static string $resource = ApplicationResource::class;
+
+    public function mount(int|string $record): void
     {
         parent::mount($record);
-        
+
         // Check if there's a token in the session (from creation or regeneration)
         if (session()->has('revealed_token')) {
             $this->revealedToken = session()->get('revealed_token');
             session()->forget('revealed_token');
         }
+    }
+
+    public function getRevealedToken(): ?string
+    {
+        return $this->revealedToken;
     }
 
     protected function getHeaderActions(): array
@@ -38,12 +43,12 @@ class ViewApplication extends ViewRecord
                 ->modalDescription('This will invalidate the current token. Make sure to update your application with the new token.')
                 ->modalSubmitActionLabel('Regenerate Token')
                 ->action(function () {
-                    $service = app(ApplicationService::class);
+                    $service    = app(ApplicationService::class);
                     $plainToken = $service->regenerateToken($this->record->id);
-                    
+
                     // Set the revealed token to display in the widget
                     $this->revealedToken = $plainToken;
-                    
+
                     Notification::make()
                         ->title('Token Regenerated Successfully')
                         ->body('Your new API token is displayed below. Copy it now - it won\'t be shown again!')
@@ -54,7 +59,7 @@ class ViewApplication extends ViewRecord
             \Filament\Actions\EditAction::make(),
         ];
     }
-    
+
     protected function getFooterWidgets(): array
     {
         if ($this->revealedToken) {
@@ -62,12 +67,7 @@ class ViewApplication extends ViewRecord
                 \Modules\Stopit\Filament\Widgets\TokenDisplayWidget::class,
             ];
         }
-        
+
         return [];
-    }
-    
-    public function getRevealedToken(): ?string
-    {
-        return $this->revealedToken;
     }
 }

@@ -10,17 +10,17 @@ use Modules\Stopit\Services\DashboardService;
 class ExceptionStatsWidget extends BaseWidget
 {
     use HasUserAccount;
-    
+
     public ?int $applicationId = null;
 
     protected function getStats(): array
     {
         $service = app(DashboardService::class);
-        
+
         $applicationId = $this->resolveApplicationId();
-        $accountId = $this->getUserAccountId();
-        $counts = $service->getCountBySeverity($applicationId, $accountId);
-        
+        $accountId     = $this->getUserAccountId();
+        $counts        = $service->getCountBySeverity($applicationId, $accountId);
+
         return [
             Stat::make('Info', $counts['info'])
                 ->color('info'),
@@ -35,9 +35,9 @@ class ExceptionStatsWidget extends BaseWidget
 
     protected function resolveApplicationId(): int
     {
-        $filters = $this->filters ?? [];
+        $filters       = $this->filters ?? [];
         $selectedAppId = $filters['applicationId'] ?? $this->applicationId;
-        
+
         if ($selectedAppId) {
             // Verify user has access to this application
             $application = \Modules\Stopit\Models\Application::where('id', $selectedAppId)
@@ -45,12 +45,12 @@ class ExceptionStatsWidget extends BaseWidget
                     $q->where('users.id', auth()->id());
                 })
                 ->first();
-            
+
             if ($application) {
                 return $application->id;
             }
         }
-        
+
         return 0;
     }
 }
