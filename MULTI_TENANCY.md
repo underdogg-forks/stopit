@@ -2,35 +2,29 @@
 
 ## Overview
 
-Stopit implements a complete subdomain-based multi-tenancy system where each workspace (account) gets its own subdomain. This allows organizations to have isolated workspaces with their own branding and access control.
+Stopit implements subdomain-based multi-tenancy using the `tenancy/tenancy` package. Each workspace (account) gets its own subdomain, providing isolated environments with proper tenant identification and data scoping.
 
 ## Architecture
 
 ### Subdomain Routing
 
-- **Main Domain**: `stopit.dev` - Central dashboard, tenant selection
+- **Main Domain**: `stopit.dev` - Central dashboard
 - **Tenant Subdomains**: `{workspace}.stopit.dev` - Individual workspace instances
 - **Example**: `gitman.stopit.dev`, `spotivel.stopit.dev`
 
 ### Key Components
 
-1. **IdentifyTenant Middleware** (`Modules/Stopit/Http/Middleware/IdentifyTenant.php`)
-   - Extracts subdomain from request
-   - Loads tenant (Account) from database
-   - Sets tenant context in session
-   - Shares tenant data with views
+1. **tenancy/tenancy Package**
+   - Handles tenant identification via subdomain
+   - Provides tenant resolution and context management
+   - Manages tenant-aware database queries
 
-2. **EnforceTenantAccess Middleware** (`Modules/Stopit/Http/Middleware/EnforceTenantAccess.php`)
-   - Validates user has access to current tenant
-   - Prevents unauthorized cross-tenant access
-   - Logs out users attempting to access unauthorized tenants
+2. **Account Model** (`Modules/Stopit/src/Models/Account.php`)
+   - Implements `Tenancy\Identification\Contracts\Tenant` interface
+   - Provides `getTenantIdentifier()` and `getTenantKey()` methods
+   - Stores tenant domain in `domain` column
 
-3. **TenantSwitcherController** (`Modules/Stopit/Http/Middleware/TenantSwitcherController.php`)
-   - Displays available workspaces for user
-   - Handles switching between tenants
-   - Generates tenant-specific URLs
-
-4. **Database Schema**
+3. **Database Schema**
    ```sql
    accounts table:
    - id
@@ -52,102 +46,99 @@ SESSION_DOMAIN=.stopit.dev
 TENANT_CENTRAL_DOMAIN=stopit.dev
 ```
 
-### Session Configuration
+### Tenancy Configuration (config/tenancy.php)
 
-Sessions are shared across subdomains using a leading dot in `SESSION_DOMAIN`. This allows users to switch between tenants without re-authenticating.
-
-## User Workflow
-
-### 1. Navigate to Tenant Subdomain
-
-```
-https://gitman.stopit.dev
-```
-
-- Middleware identifies tenant from subdomain
-- Sets tenant context in session
-- Redirects to login if not authenticated
-
-### 2. Login
-
-- User authenticates via Filament login page
-- Nord theme with orange accents applied
-- EnforceTenantAccess validates user has access
-
-### 3. Work Within Tenant
-
-- All data (applications, exceptions) scoped to tenant
-- User menu shows "Switch Workspace" option
-- Tenant context persists across requests
-
-### 4. Switch Workspace
-
-- Click "Switch Workspace" in user menu
-- See list of available workspaces
-- Click workspace to redirect to its subdomain
-
-### 5. Main Domain Access
-
-```
-https://stopit.dev
+```php
+return [
+    'tenant_model' => \Modules\Stopit\Models\Account::class,
+    'identification_driver' => 'subdomain',
+    'central_domains' => [
+        env('TENANT_CENTRAL_DOMAIN', 'stopit.dev'),
+    ],
+    'tenant_column' => 'domain',
+];
 ```
 
-- Clears tenant context
-- Shows generic dashboard
-- Displays all workspaces user has access to
+## Installation
 
-## Testing
-
-### Running Multi-Tenancy Tests
+### 1. Install the Package
 
 ```bash
-php artisan test --filter=Tenancy
+composer require tenancy/tenancy
 ```
 
-### Test Suites
+### 2. Register Service Provider
 
-1. **SubdomainTenancyTest** (6 tests)
-   - Subdomain identification
-   - Access control
-   - Session management
-   - Invalid tenant handling
+The `TenancyServiceProvider` is automatically registered in `bootstrap/providers.php`:
 
-2. **TenantSwitcherTest** (8 tests)
-   - Workspace switcher UI
-   - Tenant switching
-   - Authorization
-   - Current tenant indication
+```php
+return [
+    App\Providers\AppServiceProvider::class,
+    App\Providers\TenancyServiceProvider::class,
+];
+```
 
-3. **CompleteMultiTenancyWorkflowTest** (8 tests)
-   - End-to-end workflows
-   - Cross-tenant isolation
-   - Session scoping
-   - Authentication flow
+### 3. Database Migration
 
-## Security Considerations
+Run the migration to add multi-tenancy columns to accounts:
 
-### Cross-Tenant Isolation
+```bash
+php artisan migrate
+```
 
-- **Resource Scoping**: All Filament resources scope queries to current tenant
-- **Middleware Enforcement**: EnforceTenantAccess on all authenticated routes
-- **Session Validation**: Tenant ID validated on every request
-- **Policy Checks**: User-tenant relationship verified
+## Usage
 
-### Attack Prevention
+### Accessing Tenant Context
 
-1. **Subdomain Guessing**: Invalid subdomains return 404
-2. **Session Hijacking**: Tenant ID in session, validated server-side
-3. **Direct URL Access**: Resources check tenant access in getEloquentQuery()
-4. **Account Enumeration**: Only show workspaces user has access to
+```php
+use Tenancy\Facades\Tenancy;
+
+// Get current tenant
+$tenant = Tenancy::getTenant();
+
+// Check if a tenant is active
+if (Tenancy::isActive()) {
+    // Tenant-specific logic
+}
+
+// Get tenant property
+$domain = $tenant->getTenantIdentifier();
+```
+
+### Tenant-Aware Queries
+
+The package automatically scopes queries based on the current tenant context. Your models should use the tenant-aware traits provided by the package.
+
+### Testing
+
+When testing multi-tenant features:
+
+```php
+use Tenancy\Facades\Tenancy;
+
+public function test_tenant_specific_feature()
+{
+    $tenant = Account::factory()->create([
+        'domain' => 'test-tenant',
+    ]);
+    
+    Tenancy::setTenant($tenant);
+    
+    // Your test logic here
+    
+    Tenancy::clearTenant();
+}
+```
 
 ## Deployment
 
 ### DNS Configuration
 
-Configure wildcard DNS for subdomains:
+Configure wildcard DNS for your domain:
 
 ```
-*.stopit.dev  A  your-server-ip
+A    @           -> Your-Server-IP
+A    *.stopit.dev -> Your-Server-IP
 ```
 
 ### Web Server Configuration
@@ -157,7 +148,7 @@ Configure wildcard DNS for subdomains:
 ```nginx
 server {
     listen 80;
-    server_name *.stopit.dev stopit.dev;
+    server_name stopit.dev *.stopit.dev;
     
     root /var/www/stopit/public;
     index index.php;
@@ -169,6 +160,7 @@ server {
     location ~ \.php$ {
         fastcgi_pass unix:/var/run/php/php8.2-fpm.sock;
         fastcgi_index index.php;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
         include fastcgi_params;
     }
 }
@@ -190,46 +182,66 @@ server {
 </VirtualHost>
 ```
 
-### SSL Certificates
+### SSL/TLS
 
-Use Let's Encrypt with wildcard certificates:
+For wildcard SSL certificates:
 
 ```bash
-certbot certonly --dns-cloudflare \
-  -d stopit.dev \
-  -d *.stopit.dev
+# Using Let's Encrypt with Certbot
+certbot --nginx -d stopit.dev -d *.stopit.dev
 ```
 
 ## Troubleshooting
 
-### Session Not Persisting Across Subdomains
+### Tenant Not Identified
 
-Check `SESSION_DOMAIN` in `.env`:
-```env
-SESSION_DOMAIN=.stopit.dev  # Note the leading dot
+**Issue**: Subdomain not properly identifying tenant
+
+**Solution**:
+1. Check DNS configuration
+2. Verify `TENANT_CENTRAL_DOMAIN` in `.env`
+3. Ensure `domain` column is populated in accounts table
+4. Check web server configuration for wildcard support
+
+### Session Issues
+
+**Issue**: Session not persisting across subdomains
+
+**Solution**:
+1. Set `SESSION_DRIVER=database` in `.env`
+2. Set `SESSION_DOMAIN=.stopit.dev` (note the leading dot)
+3. Run `php artisan session:table` and `php artisan migrate`
+
+### Cross-Tenant Data Leaks
+
+**Issue**: Data from one tenant visible in another
+
+**Solution**:
+1. Ensure all models use tenant-aware traits
+2. Check that tenant context is set before queries
+3. Review Filament resource queries for proper scoping
+
+## API Integration
+
+When making API requests to tenant-specific endpoints:
+
+```bash
+# Include subdomain in the URL
+curl https://gitman.stopit.dev/api/v1/exceptions \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"message": "Error message"}'
 ```
 
-### Tenant Not Being Identified
+## Security Considerations
 
-1. Verify DNS wildcard is configured
-2. Check web server catches all subdomains
-3. Ensure `domain` column exists on `accounts` table
-4. Run migration: `php artisan migrate`
+1. **Tenant Isolation**: The tenancy package ensures data isolation at the query level
+2. **Access Control**: Users must have explicit access to each tenant
+3. **API Tokens**: Tokens are scoped to applications which belong to specific accounts
+4. **Session Security**: Cross-subdomain sessions use secure, httpOnly cookies
 
-### User Can't Access Tenant
+## Additional Resources
 
-1. Verify user-account relationship in `workspaces` pivot table
-2. Check account `is_active` is `true`
-3. Ensure middleware is registered in Filament panel
-
-## Future Enhancements
-
-- [ ] Custom domains (bring your own domain)
-- [ ] Tenant-specific branding/themes
-- [ ] Usage analytics per tenant
-- [ ] Tenant provisioning API
-- [ ] Subdomain availability check
-
-## API Documentation
-
-For API endpoints in tenant context, see [API_REFERENCE.md](API_REFERENCE.md).
+- [tenancy/tenancy Documentation](https://tenancy.dev/)
+- [Laravel Multi-Tenancy Guide](https://laravel.com/docs/multi-tenancy)
+- [Subdomain Routing in Laravel](https://laravel.com/docs/routing#route-group-subdomain-routing)
