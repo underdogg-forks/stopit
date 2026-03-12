@@ -20,7 +20,8 @@
         "php": "^8.2",
         "filament/filament": "^4.8",
         "laravel/framework": "^12.53",
-        "nwidart/laravel-modules": "^12.0.4"
+        "nwidart/laravel-modules": "^12.0.4",
+        "tenancy/tenancy": "^2.0"
     },
     "require-dev": {
         "driftingly/rector-laravel": "^2.1",

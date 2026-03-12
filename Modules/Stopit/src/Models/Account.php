@@ -5,8 +5,9 @@ namespace Modules\Stopit\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Tenancy\Identification\Contracts\Tenant;
 
-class Account extends Model
+class Account extends Model implements Tenant
 {
     use HasFactory;
 
@@ -32,6 +33,22 @@ class Account extends Model
         return $this->belongsToMany(User::class, 'workspaces')
             ->withPivot('role')
             ->withTimestamps();
+    }
+
+    /**
+     * Get the unique identifier for the tenant.
+     */
+    public function getTenantIdentifier()
+    {
+        return $this->domain;
+    }
+
+    /**
+     * Get the key name for the tenant identifier.
+     */
+    public function getTenantKey()
+    {
+        return 'domain';
     }
 
     protected static function newFactory()

@@ -3,48 +3,47 @@
 return [
     /*
     |--------------------------------------------------------------------------
-    | Central Domain
+    | Multi-Tenancy Configuration
     |--------------------------------------------------------------------------
     |
-    | This is the main domain for your application (without subdomain).
-    | Tenant subdomains will be appended to this domain.
-    | Example: stopit.dev -> gitman.stopit.dev, spotivel.stopit.dev
+    | This configuration uses the tenancy/tenancy package for Laravel.
+    | Tenants are identified by subdomain and stored in the Account model.
     |
     */
-    'central_domain' => env('TENANT_CENTRAL_DOMAIN', 'stopit.dev'),
 
+    'tenant_model' => \Modules\Stopit\Models\Account::class,
+    
     /*
     |--------------------------------------------------------------------------
-    | Base Domain for URL Generation
+    | Identification Driver
     |--------------------------------------------------------------------------
     |
-    | Used for generating tenant URLs in the application.
+    | The driver used to identify tenants. For subdomain-based tenancy,
+    | use 'subdomain'.
     |
     */
-    'base_domain' => env('APP_BASE_DOMAIN', 'stopit.dev'),
-
+    'identification_driver' => 'subdomain',
+    
     /*
     |--------------------------------------------------------------------------
-    | Session Configuration
+    | Central Domains
     |--------------------------------------------------------------------------
     |
-    | Session domain should use a leading dot to share sessions across subdomains.
-    | Example: .stopit.dev
+    | Domains that should be treated as the central application domain,
+    | not tenant-specific domains.
     |
     */
-    'session_domain' => env('SESSION_DOMAIN', '.stopit.dev'),
-
-    /*
-    |--------------------------------------------------------------------------
-    | Tenant Identification
-    |--------------------------------------------------------------------------
-    |
-    | Configure how tenants are identified in the application.
-    |
-    */
-    'identification' => [
-        'method' => 'subdomain', // subdomain, path, or header
-        'model'  => \Modules\Stopit\Models\Account::class,
-        'column' => 'domain',
+    'central_domains' => [
+        env('TENANT_CENTRAL_DOMAIN', 'stopit.dev'),
     ],
+    
+    /*
+    |--------------------------------------------------------------------------
+    | Tenant Column
+    |--------------------------------------------------------------------------
+    |
+    | The column name in the tenant model that stores the identifier.
+    |
+    */
+    'tenant_column' => 'domain',
 ];
