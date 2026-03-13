@@ -3,6 +3,7 @@
 namespace Tests\Feature\Services;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Modules\Core\Enums\Severity;
 use Modules\Stopit\Models\Account;
 use Modules\Stopit\Models\Application;
 use Modules\Stopit\Models\ExceptionRecord;
@@ -25,17 +26,21 @@ class DashboardServiceTest extends TestCase
         $this->service = app(DashboardService::class);
     }
 
-    #[Test]
-    public function it_returns_recent_exceptions_limited_to_10(): void
+    private function createApplicationWithAccount(): Application
     {
-        /* Arrange */
         $account     = Account::factory()->create();
         $application = Application::factory()->create();
         $application->accounts()->attach($account->id);
 
-        ExceptionRecord::factory()->count(15)->create([
-            'application_id' => $application->id,
-        ]);
+        return $application;
+    }
+
+    #[Test]
+    public function it_returns_recent_exceptions_limited_to_10(): void
+    {
+        /* Arrange */
+        $application = $this->createApplicationWithAccount();
+        ExceptionRecord::factory()->count(15)->create(['application_id' => $application->id]);
 
         /* Act */
         $recent = $this->service->getRecentExceptions($application->id);
@@ -48,48 +53,39 @@ class DashboardServiceTest extends TestCase
     public function it_returns_all_severity_keys_with_counts(): void
     {
         /* Arrange */
-        $account     = Account::factory()->create();
-        $application = Application::factory()->create();
-        $application->accounts()->attach($account->id);
-
+        $application = $this->createApplicationWithAccount();
         ExceptionRecord::factory()->create([
             'application_id' => $application->id,
-            'severity'       => 'info',
+            'severity'       => Severity::INFO->value,
         ]);
-
         ExceptionRecord::factory()->create([
             'application_id' => $application->id,
-            'severity'       => 'error',
+            'severity'       => Severity::ERROR->value,
         ]);
 
         /* Act */
         $counts = $this->service->getCountBySeverity($application->id);
 
         /* Assert */
-        $this->assertArrayHasKey('info', $counts);
-        $this->assertArrayHasKey('warning', $counts);
-        $this->assertArrayHasKey('error', $counts);
-        $this->assertArrayHasKey('critical', $counts);
-
-        $this->assertEquals(1, $counts['info']);
-        $this->assertEquals(0, $counts['warning']);
-        $this->assertEquals(1, $counts['error']);
-        $this->assertEquals(0, $counts['critical']);
+        $this->assertArrayHasKey(Severity::INFO->value, $counts);
+        $this->assertArrayHasKey(Severity::WARNING->value, $counts);
+        $this->assertArrayHasKey(Severity::ERROR->value, $counts);
+        $this->assertArrayHasKey(Severity::CRITICAL->value, $counts);
+        $this->assertEquals(1, $counts[Severity::INFO->value]);
+        $this->assertEquals(0, $counts[Severity::WARNING->value]);
+        $this->assertEquals(1, $counts[Severity::ERROR->value]);
+        $this->assertEquals(0, $counts[Severity::CRITICAL->value]);
     }
 
     #[Test]
     public function it_returns_count_by_exception_class(): void
     {
         /* Arrange */
-        $account     = Account::factory()->create();
-        $application = Application::factory()->create();
-        $application->accounts()->attach($account->id);
-
+        $application = $this->createApplicationWithAccount();
         ExceptionRecord::factory()->count(3)->create([
             'application_id'  => $application->id,
             'exception_class' => 'RuntimeException',
         ]);
-
         ExceptionRecord::factory()->count(2)->create([
             'application_id'  => $application->id,
             'exception_class' => 'InvalidArgumentException',
@@ -106,7 +102,7 @@ class DashboardServiceTest extends TestCase
     }
 
     #[Test]
-    public function it_returns_zeros_for_empty_application(): void
+    public function it_returns_zeros_for_unfiltered_application(): void
     {
         /* Arrange */
         $applicationId = 0;
@@ -115,30 +111,26 @@ class DashboardServiceTest extends TestCase
         $counts = $this->service->getCountBySeverity($applicationId);
 
         /* Assert */
-        $this->assertEquals(0, $counts['info']);
-        $this->assertEquals(0, $counts['warning']);
-        $this->assertEquals(0, $counts['error']);
-        $this->assertEquals(0, $counts['critical']);
+        $this->assertEquals(0, $counts[Severity::INFO->value]);
+        $this->assertEquals(0, $counts[Severity::WARNING->value]);
+        $this->assertEquals(0, $counts[Severity::ERROR->value]);
+        $this->assertEquals(0, $counts[Severity::CRITICAL->value]);
     }
 
     #[Test]
     public function it_orders_recent_exceptions_by_last_occurred_at_desc(): void
     {
         /* Arrange */
-        $account     = Account::factory()->create();
-        $application = Application::factory()->create();
-        $application->accounts()->attach($account->id);
+        $application = $this->createApplicationWithAccount();
 
         $oldest = ExceptionRecord::factory()->create([
             'application_id'   => $application->id,
             'last_occurred_at' => now()->subHours(3),
         ]);
-
         $newest = ExceptionRecord::factory()->create([
             'application_id'   => $application->id,
             'last_occurred_at' => now(),
         ]);
-
         $middle = ExceptionRecord::factory()->create([
             'application_id'   => $application->id,
             'last_occurred_at' => now()->subHours(1),

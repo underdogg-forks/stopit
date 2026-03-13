@@ -3,6 +3,7 @@
 namespace Modules\Stopit\Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Modules\Core\Enums\HttpMethod;
 use Modules\Core\Enums\Severity;
 use Modules\Stopit\Models\Application;
 use Modules\Stopit\Models\ExceptionRecord;
@@ -27,7 +28,7 @@ class ExceptionRecordFactory extends Factory
             'file'              => '/app/' . $this->faker->word() . '.php',
             'line'              => $this->faker->numberBetween(1, 500),
             'stack_trace'       => $this->faker->text(500),
-            'request_method'    => $this->faker->randomElement(['GET', 'POST', 'PUT', 'DELETE']),
+            'request_method'    => $this->faker->randomElement(HttpMethod::cases())->value,
             'request_url'       => $this->faker->url(),
             'headers'           => json_encode(['Accept' => 'application/json']),
             'user_agent'        => $this->faker->userAgent(),
@@ -49,3 +50,4 @@ class ExceptionRecordFactory extends Factory
         ]);
     }
 }
+
