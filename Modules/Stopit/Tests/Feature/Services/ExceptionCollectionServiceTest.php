@@ -4,11 +4,11 @@ namespace Tests\Feature\Services;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use InvalidArgumentException;
-use Modules\Stopit\Providers\Models\Account;
-use Modules\Stopit\Providers\Models\Application;
-use Modules\Stopit\Providers\Models\ExceptionRecord;
-use Modules\Stopit\Providers\Services\ExceptionCollectionService;
-use Modules\Stopit\Providers\src\DTOs\ExceptionData;
+use Modules\Stopit\Models\Account;
+use Modules\Stopit\Models\Application;
+use Modules\Stopit\Models\ExceptionRecord;
+use Modules\Stopit\Services\ExceptionCollectionService;
+use Modules\Stopit\DTOs\ExceptionData;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;

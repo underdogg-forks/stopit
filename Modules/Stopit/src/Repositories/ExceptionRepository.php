@@ -6,7 +6,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Modules\Stopit\Contracts\ExceptionRepositoryContract;
 use Modules\Stopit\Models\ExceptionRecord;
-use Modules\Stopit\Providers\src\DTOs\ExceptionData;
+use Modules\Stopit\DTOs\ExceptionData;
 
 class ExceptionRepository implements ExceptionRepositoryContract
 {

@@ -15,7 +15,7 @@ A standalone multi-tenant SaaS exception monitoring platform built as a Laravel 
 
 ## Directory Structure
 
-```
+```text
 stopit/
 ├── Modules/
 │   ├── Core/
@@ -134,13 +134,13 @@ git clone https://github.com/underdogg-forks/stopit.git
 cd stopit
 ```
 
-2. **Install dependencies**
+1. **Install dependencies**
 
 ```bash
 composer install
 ```
 
-3. **Configure environment**
+1. **Configure environment**
 
 ```bash
 cp .env.example .env
@@ -165,19 +165,19 @@ DB_USERNAME=root
 DB_PASSWORD=
 ```
 
-4. **Create database file** (SQLite only)
+1. **Create database file** (SQLite only)
 
 ```bash
-touch Database/Database.sqlite
+touch database/database.sqlite
 ```
 
-5. **Run migrations**
+1. **Run migrations**
 
 ```bash
 php artisan migrate
 ```
 
-6. **Seed sample data**
+1. **Seed sample data**
 
 ```bash
 php artisan db:seed --class=Modules\\Stopit\\Database\\Seeders\\StopitSeeder
@@ -188,13 +188,13 @@ This will create:
 - User: admin@acme.test / password
 - Applications: GitMan, Jobify, Spotivel, TrollBeGone (with API tokens printed to console)
 
-7. **Start the development server**
+1. **Start the development server**
 
 ```bash
 php artisan serve
 ```
 
-8. **Access the admin panel**
+1. **Access the admin panel**
 
 Visit `http://localhost:8000/admin` and log in with:
 - Email: `admin@acme.test`
@@ -206,7 +206,7 @@ Visit `http://localhost:8000/admin` and log in with:
 
 All API requests require a Bearer token in the `Authorization` header:
 
-```
+```http
 Authorization: Bearer YOUR_API_TOKEN_HERE
 ```
 
@@ -378,7 +378,7 @@ class Handler extends ExceptionHandler
         try {
             $client = new \GuzzleHttp\Client();
             
-            $client->postAsync(config('stopit.url') . '/api/v1/exceptions', [
+            $client->post(config('stopit.url') . '/api/v1/exceptions', [
                 'headers' => [
                     'Authorization' => 'Bearer ' . config('stopit.token'),
                     'Content-Type' => 'application/json',
@@ -432,10 +432,10 @@ STOPIT_TOKEN=your_application_token_here
 ### How Tokens Work
 
 1. **Generation**: Tokens are generated using `Str::random(64)`, providing ~384 bits of entropy
-2. **Storage**: Only the SHA-256 hash of the token is stored in the database
-3. **Display**: The plain token is shown **exactly once** when created or regenerated
-4. **Validation**: Incoming tokens are hashed and compared against stored hashes
-5. **Rotation**: Regenerating a token immediately invalidates the old token
+1. **Storage**: Only the SHA-256 hash of the token is stored in the database
+1. **Display**: The plain token is shown **exactly once** when created or regenerated
+1. **Validation**: Incoming tokens are hashed and compared against stored hashes
+1. **Rotation**: Regenerating a token immediately invalidates the old token
 
 ### Token Best Practices
 
@@ -504,11 +504,11 @@ Total: **28 comprehensive tests** covering all critical paths
 ### Design Principles
 
 1. **SOLID Principles** — Single responsibility, clear separations
-2. **Explicit Types** — All parameters and return types declared
-3. **Service Layer Pattern** — Business logic in services, not controllers
-4. **Repository Pattern** — Data access abstracted behind contracts
-5. **DTO Pattern** — Data transfer objects with fluent getters/setters
-6. **Transformer Pattern** — Request data transformed before service layer
+1. **Explicit Types** — All parameters and return types declared
+1. **Service Layer Pattern** — Business logic in services, not controllers
+1. **Repository Pattern** — Data access abstracted behind contracts
+1. **DTO Pattern** — Data transfer objects with fluent getters/setters
+1. **Transformer Pattern** — Request data transformed before service layer
 
 ### Key Patterns
 
@@ -526,11 +526,11 @@ Total: **28 comprehensive tests** covering all critical paths
 All data is isolated using many-to-many relationships:
 
 1. **User** belongs to many Accounts via `workspaces` pivot table (via `BelongsToManyAccounts` trait)
-2. **Application** belongs to many Accounts via `account_application` pivot table (via `BelongsToManyAccounts` trait)
-3. **ExceptionRecord** belongs to Application (which belongs to many Accounts)
-4. **Queries** are automatically scoped using account relationships
-5. **Widgets** re-assert account ownership even with specific application filter
-6. **Resources** enforce tenant scoping on all record lookups (list, view, edit) via `getEloquentQuery()` and policy methods
+1. **Application** belongs to many Accounts via `account_application` pivot table (via `BelongsToManyAccounts` trait)
+1. **ExceptionRecord** belongs to Application (which belongs to many Accounts)
+1. **Queries** are automatically scoped using account relationships
+1. **Widgets** re-assert account ownership even with specific application filter
+1. **Resources** enforce tenant scoping on all record lookups (list, view, edit) via `getEloquentQuery()` and policy methods
 
 ## Database Schema
 
@@ -659,3 +659,4 @@ Built with:
 ---
 
 **Stopit** — Stop worrying about exceptions. Start monitoring them.
+

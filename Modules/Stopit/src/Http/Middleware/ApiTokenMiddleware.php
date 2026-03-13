@@ -1,10 +1,10 @@
 <?php
 
-namespace Modules\Stopit\Providers\src\Http\Middleware;
+namespace Modules\Stopit\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Modules\Stopit\Providers\Services\ApplicationService;
+use Modules\Stopit\Services\ApplicationService;
 use Symfony\Component\HttpFoundation\Response;
 
 class ApiTokenMiddleware

@@ -1,13 +1,18 @@
 <?php
 
-namespace App\Providers\Widgets;
+namespace App\Filament\Widgets;
 
+use Filament\Pages\Dashboard\Concerns\InteractsWithPageFilters;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
+use Modules\Stopit\Models\Application;
+use Modules\Stopit\Models\ExceptionRecord;
 
 class RecentExceptionsWidget extends BaseWidget
 {
+    use InteractsWithPageFilters;
+
     public ?int $applicationId = null;
 
     protected int|string|array $columnSpan = 'full';
@@ -19,7 +24,7 @@ class RecentExceptionsWidget extends BaseWidget
         $applicationId = $this->resolveApplicationId();
 
         if ($applicationId === 0) {
-            $query = \Modules\Stopit\Providers\Models\ExceptionRecord::query()
+            $query = ExceptionRecord::query()
                 ->whereHas('application', function ($q) {
                     $q->whereHas('accounts', function ($accountQuery) {
                         $accountQuery->whereHas('users', function ($userQuery) {
@@ -30,7 +35,7 @@ class RecentExceptionsWidget extends BaseWidget
                 ->orderBy('last_occurred_at', 'desc')
                 ->limit(10);
         } else {
-            $query = \Modules\Stopit\Providers\Models\ExceptionRecord::query()
+            $query = ExceptionRecord::query()
                 ->where('application_id', $applicationId)
                 ->orderBy('last_occurred_at', 'desc')
                 ->limit(10);
@@ -58,7 +63,7 @@ class RecentExceptionsWidget extends BaseWidget
 
         if ($selectedAppId) {
             // Verify user has access to this application
-            $application = \Modules\Stopit\Providers\Models\Application::where('id', $selectedAppId)
+            $application = Application::where('id', $selectedAppId)
                 ->whereHas('accounts.users', function ($q) {
                     $q->where('users.id', auth()->id());
                 })

@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Providers\Resources\ApplicationResource\Pages;
+namespace App\Filament\Resources\ApplicationResource\Pages;
 
-use App\Providers\Resources\ApplicationResource;
+use App\Filament\Resources\ApplicationResource;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Support\Enums\IconPosition;
-use Modules\Stopit\Providers\Services\ApplicationService;
+use Modules\Stopit\Services\ApplicationService;
 
 class ViewApplication extends ViewRecord
 {
@@ -64,7 +64,7 @@ class ViewApplication extends ViewRecord
     {
         if ($this->revealedToken) {
             return [
-                \App\Providers\Widgets\TokenDisplayWidget::class,
+                \App\Filament\Widgets\TokenDisplayWidget::class,
             ];
         }
 

@@ -42,9 +42,9 @@ else
 fi
 
 # Create SQLite Database
-if [ ! -f Database/Database.sqlite ]; then
+if [ ! -f database/database.sqlite ]; then
     echo "💾 Creating SQLite database..."
-    touch Database/Database.sqlite
+    touch database/database.sqlite
 fi
 
 # Create required storage directories
@@ -52,6 +52,25 @@ echo "📁 Creating storage directories..."
 mkdir -p storage/framework/{sessions,views,cache,testing}
 mkdir -p storage/app/public
 mkdir -p storage/logs
+
+# Guard destructive operations to safe environments only
+APP_ENV="${APP_ENV:-local}"
+SAFE_ENVS="local testing ci development"
+
+is_safe_env() {
+    for env in $SAFE_ENVS; do
+        if [ "$APP_ENV" = "$env" ]; then
+            return 0
+        fi
+    done
+    return 1
+}
+
+if ! is_safe_env; then
+    echo "❌ Refusing to run migrations/seeds in APP_ENV=${APP_ENV}."
+    echo "   Only allowed in: ${SAFE_ENVS}"
+    exit 1
+fi
 
 # Run Migrations
 echo "🗄️  Running migrations..."

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Providers\Resources\ApplicationResource\Forms;
+namespace App\Filament\Resources\ApplicationResource\Forms;
 
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\TextInput;
@@ -17,7 +17,7 @@ class ApplicationForm
             TextInput::make('name')
                 ->required()
                 ->maxLength(255)
-                ->reactive()
+                ->live()
                 ->afterStateUpdated(fn ($state, callable $set) => $set('slug', Str::slug($state))),
 
             TextInput::make('slug')

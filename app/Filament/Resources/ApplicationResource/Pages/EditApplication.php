@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Providers\Resources\ApplicationResource\Pages;
+namespace App\Filament\Resources\ApplicationResource\Pages;
 
-use App\Providers\Resources\ApplicationResource;
+use App\Filament\Resources\ApplicationResource;
 use Filament\Resources\Pages\EditRecord;
 
 class EditApplication extends EditRecord

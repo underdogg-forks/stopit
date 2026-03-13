@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\Stopit\Providers\src\DTOs;
+namespace Modules\Stopit\DTOs;
 
 class ExceptionData
 {

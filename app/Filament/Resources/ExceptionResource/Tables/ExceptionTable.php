@@ -1,14 +1,15 @@
 <?php
 
-namespace App\Providers\Resources\ExceptionResource\Tables;
+namespace App\Filament\Resources\ExceptionResource\Tables;
 
+use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
 use Modules\Core\Enums\Severity;
-use Modules\Stopit\Providers\Filament\Resources\ExceptionResource\Tables\ViewAction;
+use Modules\Stopit\Models\Application;
 
 class ExceptionTable
 {
@@ -58,7 +59,19 @@ class ExceptionTable
         return [
             SelectFilter::make('application_id')
                 ->label('Application')
-                ->relationship('application', 'name')
+                ->options(function () {
+                    $user = auth()->user();
+
+                    if ( ! $user) {
+                        return [];
+                    }
+
+                    return Application::whereHas('accounts', function ($q) use ($user) {
+                        $q->whereHas('users', function ($userQuery) use ($user) {
+                            $userQuery->where('users.id', $user->id);
+                        });
+                    })->pluck('name', 'id')->toArray();
+                })
                 ->query(function (Builder $query, array $data) {
                     if ( ! empty($data['value'])) {
                         return $query->where('application_id', $data['value']);

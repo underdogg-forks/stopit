@@ -1,12 +1,12 @@
 <?php
 
-namespace Modules\Stopit\Providers\src\Http\Controllers;
+namespace Modules\Stopit\Http\Controllers;
 
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller;
-use Modules\Stopit\Providers\Services\ExceptionCollectionService;
-use Modules\Stopit\Providers\src\Http\Requests\StoreExceptionRequest;
-use Modules\Stopit\Providers\src\Transformers\ExceptionTransformer;
+use Modules\Stopit\Services\ExceptionCollectionService;
+use Modules\Stopit\Http\Requests\StoreExceptionRequest;
+use Modules\Stopit\Transformers\ExceptionTransformer;
 
 class ExceptionController extends Controller
 {
@@ -18,6 +18,10 @@ class ExceptionController extends Controller
     public function store(StoreExceptionRequest $request): JsonResponse
     {
         $application = $request->attributes->get('application');
+
+        if ( ! $application) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
 
         $data = $this->transformer->fromRequest($request);
 

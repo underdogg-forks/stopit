@@ -4,8 +4,8 @@ namespace Modules\Stopit\Contracts;
 
 use Illuminate\Support\Collection;
 use Modules\Core\Contracts\RepositoryContract;
-use Modules\Stopit\Providers\Models\ExceptionRecord;
-use Modules\Stopit\Providers\src\DTOs\ExceptionData;
+use Modules\Stopit\Models\ExceptionRecord;
+use Modules\Stopit\DTOs\ExceptionData;
 
 interface ExceptionRepositoryContract extends RepositoryContract
 {

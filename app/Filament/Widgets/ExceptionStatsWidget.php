@@ -1,15 +1,18 @@
 <?php
 
-namespace App\Providers\Widgets;
+namespace App\Filament\Widgets;
 
-use App\Providers\Traits\HasUserAccount;
+use Filament\Pages\Dashboard\Concerns\InteractsWithPageFilters;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
-use Modules\Stopit\Providers\Services\DashboardService;
+use Modules\Stopit\Models\Application;
+use Modules\Stopit\Services\DashboardService;
+use Modules\Stopit\Traits\HasUserAccount;
 
 class ExceptionStatsWidget extends BaseWidget
 {
     use HasUserAccount;
+    use InteractsWithPageFilters;
 
     public ?int $applicationId = null;
 
@@ -40,7 +43,7 @@ class ExceptionStatsWidget extends BaseWidget
 
         if ($selectedAppId) {
             // Verify user has access to this application
-            $application = \Modules\Stopit\Providers\Models\Application::where('id', $selectedAppId)
+            $application = Application::where('id', $selectedAppId)
                 ->whereHas('accounts.users', function ($q) {
                     $q->where('users.id', auth()->id());
                 })

@@ -3,7 +3,7 @@
 namespace Modules\Stopit\Contracts;
 
 use Modules\Core\Contracts\RepositoryContract;
-use Modules\Stopit\Providers\Models\Application;
+use Modules\Stopit\Models\Application;
 
 interface ApplicationRepositoryContract extends RepositoryContract
 {

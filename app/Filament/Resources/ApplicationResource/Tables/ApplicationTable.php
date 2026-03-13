@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Providers\Resources\ApplicationResource\Tables;
+namespace App\Filament\Resources\ApplicationResource\Tables;
 
 use Filament\Notifications\Notification;
+use Filament\Tables\Actions\Action;
+use Filament\Tables\Actions\DeleteAction;
+use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
-use Modules\Stopit\Providers\Filament\Resources\ApplicationResource\Tables\Action;
-use Modules\Stopit\Providers\Filament\Resources\ApplicationResource\Tables\DeleteAction;
-use Modules\Stopit\Providers\Filament\Resources\ApplicationResource\Tables\EditAction;
-use Modules\Stopit\Providers\Filament\Resources\ApplicationResource\Tables\ViewAction;
-use Modules\Stopit\Providers\Services\ApplicationService;
+use Modules\Stopit\Services\ApplicationService;
 
 class ApplicationTable
 {
@@ -44,9 +44,11 @@ class ApplicationTable
                     $service    = app(ApplicationService::class);
                     $plainToken = $service->regenerateToken($record->id);
 
+                    session()->flash('revealed_token', $plainToken);
+
                     Notification::make()
-                        ->title('Token Regenerated')
-                        ->body("New API Token: {$plainToken}")
+                        ->title('Token Regenerated Successfully')
+                        ->body('Your new API token has been generated. Copy it from the token field before navigating away.')
                         ->success()
                         ->persistent()
                         ->send();
