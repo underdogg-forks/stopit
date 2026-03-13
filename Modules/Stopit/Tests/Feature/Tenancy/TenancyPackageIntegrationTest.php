@@ -3,6 +3,7 @@
 namespace Tests\Feature\Tenancy;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Modules\Core\Enums\WorkspaceRole;
 use Modules\Stopit\Models\Account;
 use Modules\Stopit\Models\User;
 use PHPUnit\Framework\Attributes\Group;
@@ -36,7 +37,6 @@ class TenancyPackageIntegrationTest extends TestCase
     {
         parent::setUp();
 
-        // Create two tenants with domains
         $this->tenant1 = Account::factory()->create([
             'name'      => 'GitMan Workspace',
             'slug'      => 'gitman',
@@ -51,187 +51,215 @@ class TenancyPackageIntegrationTest extends TestCase
             'is_active' => true,
         ]);
 
-        // Create a user with access to both tenants
         $this->user = User::factory()->create([
             'name'  => 'Test User',
             'email' => 'test@example.com',
         ]);
 
-        $this->user->accounts()->attach($this->tenant1->id, ['role' => 'admin']);
-        $this->user->accounts()->attach($this->tenant2->id, ['role' => 'member']);
+        $this->user->accounts()->attach($this->tenant1->id, ['role' => WorkspaceRole::ADMIN->value]);
+        $this->user->accounts()->attach($this->tenant2->id, ['role' => WorkspaceRole::MEMBER->value]);
     }
 
     #[Test]
-    public function account_model_implements_tenant_contract(): void
+    public function it_implements_tenant_contract(): void
     {
-        $account = Account::factory()->create([
-            'domain' => 'test-tenant',
-        ]);
+        /* Arrange */
+        $account = Account::factory()->create(['domain' => 'test-tenant']);
 
+        /* Act & Assert */
         $this->assertInstanceOf(Tenant::class, $account);
     }
 
     #[Test]
-    public function account_returns_correct_tenant_identifier(): void
+    public function it_returns_correct_tenant_identifier(): void
     {
-        $account = Account::factory()->create([
-            'domain' => 'my-workspace',
-        ]);
+        /* Arrange */
+        $account = Account::factory()->create(['domain' => 'my-workspace']);
 
-        $this->assertEquals('my-workspace', $account->getTenantIdentifier());
+        /* Act */
+        $identifier = $account->getTenantIdentifier();
+
+        /* Assert */
+        $this->assertEquals('my-workspace', $identifier);
     }
 
     #[Test]
-    public function account_returns_correct_tenant_key(): void
+    public function it_returns_correct_tenant_key(): void
     {
-        $account = Account::factory()->create([
-            'domain' => 'test-domain',
-        ]);
+        /* Arrange */
+        $account = Account::factory()->create(['domain' => 'test-domain']);
 
-        $this->assertEquals('domain', $account->getTenantKey());
+        /* Act */
+        $key = $account->getTenantKey();
+
+        /* Assert */
+        $this->assertEquals('domain', $key);
     }
 
     #[Test]
-    public function can_set_tenant_context_programmatically(): void
+    public function it_can_set_tenant_context_programmatically(): void
     {
-        // Initially no tenant is set
+        /* Arrange */
         $this->assertNull(Tenancy::getTenant());
 
-        // Set tenant
+        /* Act */
         Tenancy::setTenant($this->tenant1);
 
-        // Verify tenant is set
+        /* Assert */
         $this->assertNotNull(Tenancy::getTenant());
         $this->assertEquals($this->tenant1->id, Tenancy::getTenant()->id);
         $this->assertEquals('gitman', Tenancy::getTenant()->getTenantIdentifier());
     }
 
     #[Test]
-    public function can_check_if_tenant_is_active(): void
+    public function it_can_check_if_tenant_is_active(): void
     {
-        // No tenant initially
+        /* Arrange */
         $this->assertFalse(Tenancy::isActive());
 
-        // Set tenant
+        /* Act */
         Tenancy::setTenant($this->tenant1);
 
-        // Tenant is now active
+        /* Assert */
         $this->assertTrue(Tenancy::isActive());
     }
 
     #[Test]
-    public function can_clear_tenant_context(): void
+    public function it_can_clear_tenant_context(): void
     {
-        // Set tenant
+        /* Arrange */
         Tenancy::setTenant($this->tenant1);
         $this->assertTrue(Tenancy::isActive());
 
-        // Clear tenant
+        /* Act */
         Tenancy::clearTenant();
 
-        // Tenant is no longer active
+        /* Assert */
         $this->assertFalse(Tenancy::isActive());
         $this->assertNull(Tenancy::getTenant());
     }
 
     #[Test]
-    public function can_switch_between_tenants(): void
+    public function it_can_switch_between_tenants(): void
     {
-        // Set first tenant
+        /* Arrange */
         Tenancy::setTenant($this->tenant1);
-        $this->assertEquals('gitman', Tenancy::getTenant()->getTenantIdentifier());
 
-        // Switch to second tenant
+        /* Act */
         Tenancy::setTenant($this->tenant2);
+
+        /* Assert */
         $this->assertEquals('spotivel', Tenancy::getTenant()->getTenantIdentifier());
     }
 
     #[Test]
-    public function tenant_context_persists_across_operations(): void
+    public function it_persists_tenant_context_across_operations(): void
     {
+        /* Arrange */
         Tenancy::setTenant($this->tenant1);
 
-        // Perform multiple operations
-        $tenant = Tenancy::getTenant();
-        $this->assertEquals($this->tenant1->id, $tenant->id);
+        /* Act */
+        $first  = Tenancy::getTenant();
+        $second = Tenancy::getTenant();
 
-        // Tenant should still be the same
-        $tenant = Tenancy::getTenant();
-        $this->assertEquals($this->tenant1->id, $tenant->id);
+        /* Assert */
+        $this->assertEquals($this->tenant1->id, $first->id);
+        $this->assertEquals($this->tenant1->id, $second->id);
     }
 
     #[Test]
-    public function inactive_tenant_can_still_be_retrieved(): void
+    public function it_allows_retrieval_of_inactive_tenant(): void
     {
+        /* Arrange */
         $inactiveTenant = Account::factory()->create([
             'name'      => 'Inactive Workspace',
             'domain'    => 'inactive',
             'is_active' => false,
         ]);
 
-        // Can set inactive tenant programmatically
+        /* Act */
         Tenancy::setTenant($inactiveTenant);
 
+        /* Assert */
         $this->assertTrue(Tenancy::isActive());
         $this->assertEquals('inactive', Tenancy::getTenant()->getTenantIdentifier());
     }
 
     #[Test]
-    public function tenant_identifier_matches_domain_column(): void
+    public function it_uses_domain_as_tenant_identifier(): void
     {
-        $account = Account::factory()->create([
-            'domain' => 'unique-domain-123',
-        ]);
+        /* Arrange */
+        $account = Account::factory()->create(['domain' => 'unique-domain-123']);
 
-        $this->assertEquals($account->domain, $account->getTenantIdentifier());
+        /* Act */
+        $identifier = $account->getTenantIdentifier();
+
+        /* Assert */
+        $this->assertEquals($account->domain, $identifier);
     }
 
     #[Test]
-    public function multiple_accounts_can_exist_with_different_domains(): void
+    public function it_allows_multiple_accounts_with_different_domains(): void
     {
+        /* Arrange */
         $accounts = Account::factory()->count(5)->create();
 
+        /* Act */
         $domains = $accounts->pluck('domain')->toArray();
 
-        // All domains should be unique
+        /* Assert */
         $this->assertEquals(count($domains), count(array_unique($domains)));
     }
 
     #[Test]
-    public function tenant_has_correct_relationships(): void
+    public function it_has_correct_relationships(): void
     {
-        $this->assertCount(0, $this->tenant1->applications);
-        $this->assertCount(1, $this->tenant1->users);
+        /* Arrange & Act */
+        $applications = $this->tenant1->applications;
+        $users        = $this->tenant1->users;
 
-        $this->assertEquals($this->user->id, $this->tenant1->users->first()->id);
+        /* Assert */
+        $this->assertCount(0, $applications);
+        $this->assertCount(1, $users);
+        $this->assertEquals($this->user->id, $users->first()->id);
     }
 
     #[Test]
-    public function can_find_tenant_by_domain(): void
+    public function it_can_find_tenant_by_domain(): void
     {
+        /* Arrange */
+
+        /* Act */
         $found = Account::where('domain', 'gitman')->first();
 
+        /* Assert */
         $this->assertNotNull($found);
         $this->assertEquals($this->tenant1->id, $found->id);
     }
 
     #[Test]
-    public function tenant_context_is_null_on_fresh_request(): void
+    public function it_starts_with_null_tenant_context_on_fresh_request(): void
     {
-        // Simulate fresh request by clearing tenant
+        /* Arrange */
         Tenancy::clearTenant();
 
-        $this->assertNull(Tenancy::getTenant());
+        /* Act */
+        $tenant = Tenancy::getTenant();
+
+        /* Assert */
+        $this->assertNull($tenant);
         $this->assertFalse(Tenancy::isActive());
     }
 
     #[Test]
-    public function tenant_model_configuration_matches_config(): void
+    public function it_has_model_configuration_matching_config(): void
     {
-        $configuredModel = config('tenancy.tenant_model');
-        $this->assertEquals(\Modules\Stopit\Models\Account::class, $configuredModel);
-
+        /* Arrange & Act */
+        $configuredModel  = config('tenancy.tenant_model');
         $configuredColumn = config('tenancy.tenant_column');
+
+        /* Assert */
+        $this->assertEquals(\Modules\Stopit\Models\Account::class, $configuredModel);
         $this->assertEquals('domain', $configuredColumn);
     }
 }

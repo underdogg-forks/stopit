@@ -5,6 +5,7 @@ namespace Modules\Stopit\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Modules\Core\Enums\HttpMethod;
 use Modules\Core\Enums\Severity;
 
 class ExceptionRecord extends Model
@@ -13,46 +14,31 @@ class ExceptionRecord extends Model
 
     protected $table = 'exceptions';
 
-    protected $fillable = [
-        'application_id',
-        'exception_class',
-        'message',
-        'file',
-        'line',
-        'stack_trace',
-        'request_method',
-        'request_url',
-        'headers',
-        'user_agent',
-        'ip_address',
-        'user_id',
-        'context',
-        'severity',
-        'occurrence_count',
-        'is_resolved',
-        'first_occurred_at',
-        'last_occurred_at',
-    ];
+    protected $guarded = [];
+
+    // Relationships (alphabetical)
 
     public function application(): BelongsTo
     {
         return $this->belongsTo(Application::class);
     }
 
-    protected static function newFactory()
-    {
-        return \Modules\Stopit\Database\Factories\ExceptionRecordFactory::new();
-    }
-
     protected function casts(): array
     {
         return [
             'context'           => 'array',
-            'severity'          => Severity::class,
-            'occurrence_count'  => 'integer',
-            'is_resolved'       => 'boolean',
             'first_occurred_at' => 'datetime',
+            'is_resolved'       => 'boolean',
             'last_occurred_at'  => 'datetime',
+            'occurrence_count'  => 'integer',
+            'request_method'    => HttpMethod::class,
+            'severity'          => Severity::class,
         ];
     }
+
+    protected static function newFactory(): \Modules\Stopit\Database\Factories\ExceptionRecordFactory
+    {
+        return \Modules\Stopit\Database\Factories\ExceptionRecordFactory::new();
+    }
 }
+

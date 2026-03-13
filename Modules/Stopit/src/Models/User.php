@@ -14,20 +14,19 @@ class User extends Authenticatable implements FilamentUser
     use HasFactory;
     use Notifiable;
 
-    protected $fillable = [
-        'name',
-        'email',
-        'password',
-    ];
+    protected $guarded = [];
 
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
+    // Relationships (alphabetical)
+
     public function accounts(): BelongsToMany
     {
         return $this->belongsToMany(Account::class, 'workspaces')
+            ->using(Workspace::class)
             ->withPivot('role')
             ->withTimestamps();
     }
@@ -37,15 +36,16 @@ class User extends Authenticatable implements FilamentUser
         return true;
     }
 
-    protected static function newFactory()
-    {
-        return \Modules\Stopit\Database\Factories\UserFactory::new();
-    }
-
     protected function casts(): array
     {
         return [
             'password' => 'hashed',
         ];
     }
+
+    protected static function newFactory(): \Modules\Stopit\Database\Factories\UserFactory
+    {
+        return \Modules\Stopit\Database\Factories\UserFactory::new();
+    }
 }
+

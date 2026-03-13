@@ -4,8 +4,11 @@ namespace Tests\Feature\Workflows;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use InvalidArgumentException;
+use Modules\Core\Enums\WorkspaceRole;
+use Modules\Stopit\DTOs\ApplicationData;
 use Modules\Stopit\Models\Account;
 use Modules\Stopit\Models\Application;
+use Modules\Stopit\Models\ExceptionRecord;
 use Modules\Stopit\Models\User;
 use Modules\Stopit\Services\ApplicationService;
 use PHPUnit\Framework\Attributes\Group;
@@ -40,7 +43,6 @@ class ApplicationTokenWorkflowTest extends TestCase
 
         $this->applicationService = app(ApplicationService::class);
 
-        // Create a user with an account (simulating a gitman project maintainer)
         $this->account = Account::factory()->create([
             'name' => 'GitMan Project',
             'slug' => 'gitman-project',
@@ -51,77 +53,50 @@ class ApplicationTokenWorkflowTest extends TestCase
             'email' => 'john@gitman.dev',
         ]);
 
-        // Attach user to account via workspaces pivot
-        $this->user->accounts()->attach($this->account->id, ['role' => 'owner']);
+        $this->user->accounts()->attach($this->account->id, ['role' => WorkspaceRole::OWNER->value]);
+    }
+
+    private function createApplication(string $name = 'GitMan API', string $slug = 'gitman-api'): array
+    {
+        $applicationData = new ApplicationData();
+        $applicationData->setAccountId($this->account->id)
+            ->setName($name)
+            ->setSlug($slug);
+
+        return $this->applicationService->createApplication($applicationData);
     }
 
     #[Test]
-    public function complete_workflow_from_login_to_posting_exception(): void
+    public function it_completes_full_workflow_from_login_to_posting_exception(): void
     {
-        /*
-         * Step 1: User logs in
-         */
+        /* Arrange */
         $this->actingAs($this->user);
-        $this->assertAuthenticated();
 
-        /**
-         * Step 2: User creates a new application and receives API token.
-         */
-        $applicationData = new \Modules\Stopit\DTOs\ApplicationData();
-        $applicationData->setAccountId($this->account->id)
-            ->setName('GitMan API')
-            ->setSlug('gitman-api');
-
-        $result = $this->applicationService->createApplication($applicationData);
-
-        $this->assertArrayHasKey('application', $result);
-        $this->assertArrayHasKey('plain_token', $result);
-
+        /* Act */
+        $result      = $this->createApplication();
         $application = $result['application'];
         $apiToken    = $result['plain_token'];
 
-        // Verify application is created
-        $this->assertInstanceOf(Application::class, $application);
-        $this->assertEquals('GitMan API', $application->name);
-
-        // Verify token format (64 character string)
-        $this->assertEquals(64, mb_strlen($apiToken));
-        $this->assertMatchesRegularExpression('/^[a-zA-Z0-9]{64}$/', $apiToken);
-
-        /**
-         * Step 3: Token is active and can be validated.
-         */
         $validatedApplication = $this->applicationService->validateToken($apiToken);
 
-        $this->assertNotNull($validatedApplication);
-        $this->assertEquals($application->id, $validatedApplication->id);
-        $this->assertEquals('GitMan API', $validatedApplication->name);
-
-        /**
-         * Step 4: Use the token to post an exception via API.
-         */
-        $exceptionPayload = [
+        $response = $this->postJson('/api/v1/exceptions', [
             'exception_class' => 'RuntimeException',
             'message'         => 'Database connection failed in GitMan',
             'file'            => '/app/Database/Connection.php',
             'line'            => 42,
             'severity'        => 'error',
-            'stack_trace'     => "RuntimeException: Database connection failed\n at Connection.php:42",
-        ];
+        ], ['Authorization' => "Bearer {$apiToken}"]);
 
-        $response = $this->postJson('/api/v1/exceptions', $exceptionPayload, [
-            'Authorization' => "Bearer {$apiToken}",
-        ]);
-
+        /* Assert */
+        $this->assertAuthenticated();
+        $this->assertInstanceOf(Application::class, $application);
+        $this->assertEquals('GitMan API', $application->name);
+        $this->assertEquals(64, mb_strlen($apiToken));
+        $this->assertMatchesRegularExpression('/^[a-zA-Z0-9]{64}$/', $apiToken);
+        $this->assertNotNull($validatedApplication);
+        $this->assertEquals($application->id, $validatedApplication->id);
         $response->assertStatus(201);
-        $response->assertJsonStructure([
-            'id',
-            'exception_class',
-            'message',
-            'created_at',
-        ]);
-
-        // Verify exception was stored
+        $response->assertJsonStructure(['id', 'exception_class', 'message', 'created_at']);
         $this->assertDatabaseHas('exceptions', [
             'application_id'  => $application->id,
             'exception_class' => 'RuntimeException',
@@ -130,244 +105,196 @@ class ApplicationTokenWorkflowTest extends TestCase
     }
 
     #[Test]
-    public function user_must_be_authenticated_to_create_application(): void
+    public function it_requires_authentication_to_create_application(): void
     {
-        // User is NOT authenticated
-        $this->assertGuest();
+        /* Arrange - User is NOT authenticated */
 
-        // Attempting to create application via service would fail
-        // In real UI, Filament would prevent access to the create page
-        $this->get('/admin/applications/create')
-            ->assertRedirect('/admin/login');
+        /* Act */
+        $response = $this->get('/admin/applications/create');
+
+        /* Assert */
+        $this->assertGuest();
+        $response->assertRedirect('/admin/login');
     }
 
     #[Test]
-    public function user_must_have_at_least_one_account_to_create_application(): void
+    public function it_requires_account_to_create_application(): void
     {
-        // Create a user with NO accounts
+        /* Arrange */
         $orphanUser = User::factory()->create([
             'name'  => 'Orphan User',
             'email' => 'orphan@example.com',
         ]);
-
         $this->actingAs($orphanUser);
 
-        // Attempting to create application should fail
-        $applicationData = new \Modules\Stopit\DTOs\ApplicationData();
-        $applicationData->setAccountId(999) // Non-existent account
-            ->setName('Test App')
-            ->setSlug('test-app');
-
-        // The service would attach to account 999, but validation should happen at form level
-        // In the Filament form, mutateFormDataBeforeCreate would throw an exception
+        /* Act & Assert */
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('User must belong to at least one account');
 
-        // Simulate the Filament page behavior
         if ( ! $orphanUser->accounts()->exists()) {
             throw new RuntimeException('User must belong to at least one account to create an application.');
         }
     }
 
     #[Test]
-    public function token_can_be_regenerated_and_old_token_becomes_invalid(): void
+    public function it_invalidates_old_token_when_regenerated(): void
     {
+        /* Arrange */
         $this->actingAs($this->user);
-
-        // Create application with initial token
-        $applicationData = new \Modules\Stopit\DTOs\ApplicationData();
-        $applicationData->setAccountId($this->account->id)
-            ->setName('GitMan API')
-            ->setSlug('gitman-api');
-
-        $result      = $this->applicationService->createApplication($applicationData);
+        $result      = $this->createApplication();
         $application = $result['application'];
         $oldToken    = $result['plain_token'];
 
-        // Old token works
-        $this->assertNotNull($this->applicationService->validateToken($oldToken));
-
-        // Regenerate token (simulates clicking "Regenerate API Token" button)
+        /* Act */
         $newToken = $this->applicationService->regenerateToken($application->id);
 
-        // New token is different and works
+        $responseWithNewToken = $this->postJson('/api/v1/exceptions', [
+            'exception_class' => 'TestException',
+            'message'         => 'Test',
+        ], ['Authorization' => "Bearer {$newToken}"]);
+
+        $responseWithOldToken = $this->postJson('/api/v1/exceptions', [
+            'exception_class' => 'TestException',
+            'message'         => 'Test',
+        ], ['Authorization' => "Bearer {$oldToken}"]);
+
+        /* Assert */
         $this->assertNotEquals($oldToken, $newToken);
         $this->assertEquals(64, mb_strlen($newToken));
         $this->assertNotNull($this->applicationService->validateToken($newToken));
-
-        // Old token no longer works
         $this->assertNull($this->applicationService->validateToken($oldToken));
+        $responseWithNewToken->assertStatus(201);
+        $responseWithOldToken->assertStatus(401);
+        $responseWithOldToken->assertJson(['message' => 'Invalid or missing API token']);
+    }
 
-        // Try to use old token to post exception - should fail
-        $response = $this->postJson('/api/v1/exceptions', [
-            'exception_class' => 'TestException',
-            'message'         => 'Test',
-        ], [
-            'Authorization' => "Bearer {$oldToken}",
-        ]);
+    #[Test]
+    public function it_rejects_api_request_without_token(): void
+    {
+        /* Arrange */
+        $payload = ['exception_class' => 'TestException', 'message' => 'Test'];
 
+        /* Act */
+        $response = $this->postJson('/api/v1/exceptions', $payload);
+
+        /* Assert */
         $response->assertStatus(401);
         $response->assertJson(['message' => 'Invalid or missing API token']);
     }
 
     #[Test]
-    public function api_request_without_token_is_rejected(): void
+    public function it_rejects_api_request_with_invalid_token(): void
     {
-        $response = $this->postJson('/api/v1/exceptions', [
-            'exception_class' => 'TestException',
-            'message'         => 'Test',
-        ]);
-
-        $response->assertStatus(401);
-        $response->assertJson(['message' => 'Invalid or missing API token']);
-    }
-
-    #[Test]
-    public function api_request_with_invalid_token_is_rejected(): void
-    {
+        /* Arrange */
         $invalidToken = 'invalid-token-1234567890123456789012345678901234567890123456';
 
+        /* Act */
         $response = $this->postJson('/api/v1/exceptions', [
             'exception_class' => 'TestException',
             'message'         => 'Test',
-        ], [
-            'Authorization' => "Bearer {$invalidToken}",
-        ]);
+        ], ['Authorization' => "Bearer {$invalidToken}"]);
 
+        /* Assert */
         $response->assertStatus(401);
         $response->assertJson(['message' => 'Invalid or missing API token']);
     }
 
     #[Test]
-    public function api_request_with_malformed_token_is_rejected(): void
+    public function it_rejects_api_request_with_malformed_token(): void
     {
-        $testCases = [
+        /* Arrange */
+        $malformedTokens = [
             'too-short',
-            '',
             ' ',
-            'Bearer token-here', // Token WITH "Bearer" prefix
-            str_repeat('a', 63), // Too short
-            str_repeat('a', 65), // Too long
+            'Bearer token-here',
+            str_repeat('a', 63),
+            str_repeat('a', 65),
         ];
 
-        foreach ($testCases as $malformedToken) {
+        /* Act & Assert */
+        foreach ($malformedTokens as $malformedToken) {
             $response = $this->postJson('/api/v1/exceptions', [
                 'exception_class' => 'TestException',
                 'message'         => 'Test',
-            ], [
-                'Authorization' => "Bearer {$malformedToken}",
-            ]);
+            ], ['Authorization' => "Bearer {$malformedToken}"]);
 
             $response->assertStatus(401);
         }
     }
 
     #[Test]
-    public function token_is_only_shown_once_during_creation(): void
+    public function it_stores_only_hashed_token_never_plain_text(): void
     {
+        /* Arrange */
         $this->actingAs($this->user);
-
-        // Create application
-        $applicationData = new \Modules\Stopit\DTOs\ApplicationData();
-        $applicationData->setAccountId($this->account->id)
-            ->setName('GitMan API')
-            ->setSlug('gitman-api');
-
-        $result      = $this->applicationService->createApplication($applicationData);
+        $result      = $this->createApplication();
         $application = $result['application'];
         $plainToken  = $result['plain_token'];
+        $hashedToken = hash('sha256', $plainToken);
 
-        // Token is NOT stored in plain text in Database
+        /* Act */
+        $applicationFromDb = Application::find($application->id);
+
+        /* Assert */
         $this->assertDatabaseMissing('applications', [
             'id'        => $application->id,
             'api_token' => $plainToken,
         ]);
-
-        // Only hashed version is stored
-        $hashedToken = hash('sha256', $plainToken);
         $this->assertDatabaseHas('applications', [
             'id'        => $application->id,
             'api_token' => $hashedToken,
         ]);
-
-        // Plain token is only in the response, nowhere else
-        $applicationFromDb = Application::find($application->id);
         $this->assertNotEquals($plainToken, $applicationFromDb->api_token);
     }
 
     #[Test]
-    public function multiple_concurrent_exception_posts_with_same_token_succeed(): void
+    public function it_accepts_multiple_concurrent_exception_posts_with_same_token(): void
     {
+        /* Arrange */
         $this->actingAs($this->user);
-
-        // Create application and get token
-        $applicationData = new \Modules\Stopit\DTOs\ApplicationData();
-        $applicationData->setAccountId($this->account->id)
-            ->setName('GitMan API')
-            ->setSlug('gitman-api');
-
-        $result   = $this->applicationService->createApplication($applicationData);
+        $result   = $this->createApplication();
         $apiToken = $result['plain_token'];
 
-        // Simulate multiple concurrent requests with the same token
+        /* Act */
         $responses = [];
         for ($i = 1; $i <= 5; $i++) {
             $responses[] = $this->postJson('/api/v1/exceptions', [
                 'exception_class' => 'RuntimeException',
                 'message'         => "Concurrent error #{$i}",
                 'severity'        => 'error',
-            ], [
-                'Authorization' => "Bearer {$apiToken}",
-            ]);
+            ], ['Authorization' => "Bearer {$apiToken}"]);
         }
 
-        // All requests should succeed
+        /* Assert */
         foreach ($responses as $response) {
             $response->assertStatus(201);
         }
-
-        // Verify all 5 exceptions were stored
         $this->assertDatabaseCount('exceptions', 5);
     }
 
     #[Test]
-    public function token_belongs_to_specific_application_and_account(): void
+    public function it_scopes_exceptions_to_the_application_matching_the_token(): void
     {
+        /* Arrange */
         $this->actingAs($this->user);
-
-        // Create two applications under the same account
-        $app1Data = new \Modules\Stopit\DTOs\ApplicationData();
-        $app1Data->setAccountId($this->account->id)
-            ->setName('GitMan Frontend')
-            ->setSlug('gitman-frontend');
-
-        $result1 = $this->applicationService->createApplication($app1Data);
+        $result1 = $this->createApplication('GitMan Frontend', 'gitman-frontend');
         $app1    = $result1['application'];
         $token1  = $result1['plain_token'];
 
-        $app2Data = new \Modules\Stopit\DTOs\ApplicationData();
-        $app2Data->setAccountId($this->account->id)
-            ->setName('GitMan Backend')
-            ->setSlug('gitman-backend');
-
-        $result2 = $this->applicationService->createApplication($app2Data);
+        $result2 = $this->createApplication('GitMan Backend', 'gitman-backend');
         $app2    = $result2['application'];
-        $token2  = $result2['plain_token'];
 
-        // Post exception using token1
+        /* Act */
         $this->postJson('/api/v1/exceptions', [
             'exception_class' => 'FrontendException',
             'message'         => 'Frontend error',
-        ], [
-            'Authorization' => "Bearer {$token1}",
-        ])->assertStatus(201);
+        ], ['Authorization' => "Bearer {$token1}"])->assertStatus(201);
 
-        // Verify exception is associated with app1, not app2
+        /* Assert */
         $this->assertDatabaseHas('exceptions', [
             'application_id' => $app1->id,
             'message'        => 'Frontend error',
         ]);
-
         $this->assertDatabaseMissing('exceptions', [
             'application_id' => $app2->id,
             'message'        => 'Frontend error',
@@ -375,68 +302,53 @@ class ApplicationTokenWorkflowTest extends TestCase
     }
 
     #[Test]
-    public function user_can_only_see_applications_from_their_accounts(): void
+    public function it_scopes_applications_to_user_accounts(): void
     {
-        // Create another account and user
+        /* Arrange */
         $otherAccount = Account::factory()->create(['name' => 'Other Project']);
         $otherUser    = User::factory()->create(['email' => 'other@example.com']);
         $otherUser->accounts()->attach($otherAccount->id);
 
-        // Our user creates an application
         $this->actingAs($this->user);
-        $appData = new \Modules\Stopit\DTOs\ApplicationData();
-        $appData->setAccountId($this->account->id)
-            ->setName('GitMan API')
-            ->setSlug('gitman-api');
+        $ourResult = $this->createApplication();
+        $ourApplication = $ourResult['application'];
 
-        $result         = $this->applicationService->createApplication($appData);
-        $ourApplication = $result['application'];
-
-        // Other user creates an application
         $this->actingAs($otherUser);
-        $otherAppData = new \Modules\Stopit\DTOs\ApplicationData();
-        $otherAppData->setAccountId($otherAccount->id)
+        $otherApplicationData = new ApplicationData();
+        $otherApplicationData->setAccountId($otherAccount->id)
             ->setName('Other API')
             ->setSlug('other-api');
-
-        $otherResult      = $this->applicationService->createApplication($otherAppData);
+        $otherResult      = $this->applicationService->createApplication($otherApplicationData);
         $otherApplication = $otherResult['application'];
 
-        // Verify applications are in different accounts
-        $this->assertTrue($ourApplication->accounts()->where('accounts.id', $this->account->id)->exists());
-        $this->assertFalse($ourApplication->accounts()->where('accounts.id', $otherAccount->id)->exists());
+        /* Act */
+        $ourAccountIds   = $ourApplication->accounts()->pluck('accounts.id')->toArray();
+        $otherAccountIds = $otherApplication->accounts()->pluck('accounts.id')->toArray();
 
-        $this->assertTrue($otherApplication->accounts()->where('accounts.id', $otherAccount->id)->exists());
-        $this->assertFalse($otherApplication->accounts()->where('accounts.id', $this->account->id)->exists());
+        /* Assert */
+        $this->assertContains($this->account->id, $ourAccountIds);
+        $this->assertNotContains($otherAccount->id, $ourAccountIds);
+        $this->assertContains($otherAccount->id, $otherAccountIds);
+        $this->assertNotContains($this->account->id, $otherAccountIds);
     }
 
     #[Test]
-    public function regenerated_token_can_immediately_be_used_to_post_exceptions(): void
+    public function it_allows_immediate_use_of_regenerated_token(): void
     {
+        /* Arrange */
         $this->actingAs($this->user);
-
-        // Create application
-        $applicationData = new \Modules\Stopit\DTOs\ApplicationData();
-        $applicationData->setAccountId($this->account->id)
-            ->setName('GitMan API')
-            ->setSlug('gitman-api');
-
-        $result      = $this->applicationService->createApplication($applicationData);
+        $result      = $this->createApplication();
         $application = $result['application'];
 
-        // Regenerate token
+        /* Act */
         $newToken = $this->applicationService->regenerateToken($application->id);
-
-        // Immediately use the new token (no delay needed)
         $response = $this->postJson('/api/v1/exceptions', [
             'exception_class' => 'TestException',
             'message'         => 'Test with new token',
-        ], [
-            'Authorization' => "Bearer {$newToken}",
-        ]);
+        ], ['Authorization' => "Bearer {$newToken}"]);
 
+        /* Assert */
         $response->assertStatus(201);
-
         $this->assertDatabaseHas('exceptions', [
             'application_id' => $application->id,
             'message'        => 'Test with new token',
@@ -444,80 +356,64 @@ class ApplicationTokenWorkflowTest extends TestCase
     }
 
     #[Test]
-    public function api_token_is_case_sensitive(): void
+    public function it_treats_api_token_as_case_sensitive(): void
     {
+        /* Arrange */
         $this->actingAs($this->user);
-
-        // Create application
-        $applicationData = new \Modules\Stopit\DTOs\ApplicationData();
-        $applicationData->setAccountId($this->account->id)
-            ->setName('GitMan API')
-            ->setSlug('gitman-api');
-
-        $result       = $this->applicationService->createApplication($applicationData);
+        $result       = $this->createApplication();
         $correctToken = $result['plain_token'];
-
-        // Try with uppercase version
         $uppercaseToken = mb_strtoupper($correctToken);
 
+        /* Act */
         $response = $this->postJson('/api/v1/exceptions', [
             'exception_class' => 'TestException',
             'message'         => 'Test',
-        ], [
-            'Authorization' => "Bearer {$uppercaseToken}",
-        ]);
+        ], ['Authorization' => "Bearer {$uppercaseToken}"]);
 
-        // Should fail because token is case-sensitive
+        /* Assert */
         $response->assertStatus(401);
     }
 
     #[Test]
-    public function application_name_and_slug_are_required(): void
+    public function it_requires_name_and_slug_to_create_application(): void
     {
+        /* Arrange */
         $this->actingAs($this->user);
-
-        // Test missing name
-        $data1 = new \Modules\Stopit\DTOs\ApplicationData();
-        $data1->setAccountId($this->account->id)
+        $data = new ApplicationData();
+        $data->setAccountId($this->account->id)
             ->setName('')
             ->setSlug('test-slug');
 
+        /* Act & Assert */
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Name and slug are required');
-        $this->applicationService->createApplication($data1);
+        $this->applicationService->createApplication($data);
     }
 
     #[Test]
-    public function posted_exceptions_increment_occurrence_count_for_duplicates(): void
+    public function it_increments_occurrence_count_for_duplicate_exceptions(): void
     {
+        /* Arrange */
         $this->actingAs($this->user);
-
-        // Create application
-        $applicationData = new \Modules\Stopit\DTOs\ApplicationData();
-        $applicationData->setAccountId($this->account->id)
-            ->setName('GitMan API')
-            ->setSlug('gitman-api');
-
-        $result   = $this->applicationService->createApplication($applicationData);
+        $result   = $this->createApplication();
         $apiToken = $result['plain_token'];
 
-        // Post same exception 3 times
         $payload = [
             'exception_class' => 'DatabaseException',
             'message'         => 'Connection timeout',
             'severity'        => 'error',
         ];
 
+        /* Act */
         for ($i = 0; $i < 3; $i++) {
             $this->postJson('/api/v1/exceptions', $payload, [
                 'Authorization' => "Bearer {$apiToken}",
             ])->assertStatus(201);
         }
 
-        // Should have only 1 record with occurrence_count = 3
+        /* Assert */
         $this->assertDatabaseCount('exceptions', 1);
-
-        $exception = \Modules\Stopit\Models\ExceptionRecord::first();
+        $exception = ExceptionRecord::first();
         $this->assertEquals(3, $exception->occurrence_count);
         $this->assertEquals('DatabaseException', $exception->exception_class);
         $this->assertEquals('Connection timeout', $exception->message);

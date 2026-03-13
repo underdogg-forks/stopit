@@ -5,22 +5,23 @@ namespace Modules\Stopit\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Modules\Core\Enums\WorkspaceRole;
 use Tenancy\Identification\Contracts\Tenant;
 
 class Account extends Model implements Tenant
 {
     use HasFactory;
 
-    protected $fillable = [
-        'name',
-        'slug',
-        'domain',
-        'is_active',
-    ];
+    protected $guarded = [];
 
-    protected $casts = [
-        'is_active' => 'boolean',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'is_active' => 'boolean',
+        ];
+    }
+
+    // Relationships (alphabetical)
 
     public function applications(): BelongsToMany
     {
@@ -31,14 +32,17 @@ class Account extends Model implements Tenant
     public function users(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'workspaces')
+            ->using(Workspace::class)
             ->withPivot('role')
             ->withTimestamps();
     }
 
+    // Tenant contract methods
+
     /**
      * Get the unique identifier for the tenant.
      */
-    public function getTenantIdentifier()
+    public function getTenantIdentifier(): string
     {
         return $this->domain;
     }
@@ -46,13 +50,14 @@ class Account extends Model implements Tenant
     /**
      * Get the key name for the tenant identifier.
      */
-    public function getTenantKey()
+    public function getTenantKey(): string
     {
         return 'domain';
     }
 
-    protected static function newFactory()
+    protected static function newFactory(): \Modules\Stopit\Database\Factories\AccountFactory
     {
         return \Modules\Stopit\Database\Factories\AccountFactory::new();
     }
 }
+

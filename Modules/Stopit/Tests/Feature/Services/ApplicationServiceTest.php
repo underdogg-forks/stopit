@@ -4,10 +4,11 @@ namespace Tests\Feature\Services;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use InvalidArgumentException;
+use Modules\Core\Enums\WorkspaceRole;
+use Modules\Stopit\DTOs\ApplicationData;
 use Modules\Stopit\Models\Account;
 use Modules\Stopit\Models\Application;
 use Modules\Stopit\Services\ApplicationService;
-use Modules\Stopit\DTOs\ApplicationData;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
@@ -26,15 +27,22 @@ class ApplicationServiceTest extends TestCase
         $this->service = app(ApplicationService::class);
     }
 
+    private function makeApplicationData(Account $account, string $name = 'Test App', string $slug = 'test-app'): ApplicationData
+    {
+        $data = new ApplicationData();
+        $data->setAccountId($account->id)
+            ->setName($name)
+            ->setSlug($slug);
+
+        return $data;
+    }
+
     #[Test]
     public function it_creates_application_with_hashed_token(): void
     {
         /* Arrange */
         $account = Account::factory()->create();
-        $data    = new ApplicationData();
-        $data->setAccountId($account->id)
-            ->setName('Test App')
-            ->setSlug('test-app');
+        $data    = $this->makeApplicationData($account);
 
         /* Act */
         $result = $this->service->createApplication($data);
@@ -44,13 +52,7 @@ class ApplicationServiceTest extends TestCase
         $this->assertArrayHasKey('plain_token', $result);
         $this->assertInstanceOf(Application::class, $result['application']);
         $this->assertEquals(64, mb_strlen($result['plain_token']));
-
-        $this->assertDatabaseHas('applications', [
-            'name' => 'Test App',
-            'slug' => 'test-app',
-        ]);
-
-        // Verify pivot relationship
+        $this->assertDatabaseHas('applications', ['name' => 'Test App', 'slug' => 'test-app']);
         $this->assertDatabaseHas('account_application', [
             'account_id'     => $account->id,
             'application_id' => $result['application']->id,
@@ -61,13 +63,8 @@ class ApplicationServiceTest extends TestCase
     public function it_validates_token_correctly(): void
     {
         /* Arrange */
-        $account = Account::factory()->create();
-        $data    = new ApplicationData();
-        $data->setAccountId($account->id)
-            ->setName('Test App')
-            ->setSlug('test-app');
-
-        $result     = $this->service->createApplication($data);
+        $account    = Account::factory()->create();
+        $result     = $this->service->createApplication($this->makeApplicationData($account));
         $plainToken = $result['plain_token'];
 
         /* Act */
@@ -108,13 +105,8 @@ class ApplicationServiceTest extends TestCase
     public function it_regenerates_token_and_invalidates_old_token(): void
     {
         /* Arrange */
-        $account = Account::factory()->create();
-        $data    = new ApplicationData();
-        $data->setAccountId($account->id)
-            ->setName('Test App')
-            ->setSlug('test-app');
-
-        $result      = $this->service->createApplication($data);
+        $account     = Account::factory()->create();
+        $result      = $this->service->createApplication($this->makeApplicationData($account));
         $oldToken    = $result['plain_token'];
         $application = $result['application'];
 
@@ -124,7 +116,6 @@ class ApplicationServiceTest extends TestCase
         /* Assert */
         $this->assertEquals(64, mb_strlen($newToken));
         $this->assertNotEquals($oldToken, $newToken);
-
         $this->assertNull($this->service->validateToken($oldToken));
         $this->assertInstanceOf(Application::class, $this->service->validateToken($newToken));
     }
@@ -142,7 +133,6 @@ class ApplicationServiceTest extends TestCase
         /* Act & Assert */
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Name and slug are required');
-
         $this->service->createApplication($data);
     }
 }

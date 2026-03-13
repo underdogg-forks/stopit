@@ -4,6 +4,7 @@ namespace Modules\Stopit\Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
+use Modules\Core\Enums\WorkspaceRole;
 use Modules\Stopit\Models\Account;
 use Modules\Stopit\Models\Application;
 use Modules\Stopit\Models\User;
@@ -27,7 +28,7 @@ class StopitSeeder extends Seeder
 
         // Attach user to account if not already attached
         if ( ! $user->accounts()->where('accounts.id', $account->id)->exists()) {
-            $user->accounts()->attach($account->id, ['role' => 'owner']);
+            $user->accounts()->attach($account->id, ['role' => WorkspaceRole::OWNER->value]);
         }
 
         $applications = [

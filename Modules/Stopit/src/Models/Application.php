@@ -11,15 +11,13 @@ class Application extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'name',
-        'slug',
-        'api_token',
-    ];
+    protected $guarded = [];
 
     protected $hidden = [
         'api_token',
     ];
+
+    // Relationships (alphabetical)
 
     public function accounts(): BelongsToMany
     {
@@ -32,8 +30,9 @@ class Application extends Model
         return $this->hasMany(ExceptionRecord::class, 'application_id');
     }
 
-    protected static function newFactory()
+    protected static function newFactory(): \Modules\Stopit\Database\Factories\ApplicationFactory
     {
         return \Modules\Stopit\Database\Factories\ApplicationFactory::new();
     }
 }
+

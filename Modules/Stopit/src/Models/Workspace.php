@@ -3,17 +3,19 @@
 namespace Modules\Stopit\Models;
 
 use Illuminate\Database\Eloquent\Relations\Pivot;
+use Modules\Core\Enums\WorkspaceRole;
 
 class Workspace extends Pivot
 {
-    protected $fillable = [
-        'user_id',
-        'account_id',
-        'role',
-    ];
+    protected $guarded = [];
 
-    protected $casts = [
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'created_at' => 'datetime',
+            'role'       => WorkspaceRole::class,
+            'updated_at' => 'datetime',
+        ];
+    }
 }
+

@@ -3,6 +3,7 @@
 namespace Tests\Feature\Tenancy;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Modules\Core\Enums\WorkspaceRole;
 use Modules\Stopit\Models\Account;
 use Modules\Stopit\Models\Application;
 use Modules\Stopit\Models\User;
@@ -38,7 +39,6 @@ class TenantDataIsolationTest extends TestCase
     {
         parent::setUp();
 
-        // Create two separate tenants
         $this->tenant1 = Account::factory()->create([
             'name'      => 'GitMan Workspace',
             'slug'      => 'gitman',
@@ -53,203 +53,208 @@ class TenantDataIsolationTest extends TestCase
             'is_active' => true,
         ]);
 
-        // Create user for tenant1
         $this->user1 = User::factory()->create([
             'name'  => 'User One',
             'email' => 'user1@gitman.com',
         ]);
-        $this->user1->accounts()->attach($this->tenant1->id, ['role' => 'admin']);
+        $this->user1->accounts()->attach($this->tenant1->id, ['role' => WorkspaceRole::ADMIN->value]);
 
-        // Create user for tenant2
         $this->user2 = User::factory()->create([
             'name'  => 'User Two',
             'email' => 'user2@spotivel.com',
         ]);
-        $this->user2->accounts()->attach($this->tenant2->id, ['role' => 'admin']);
+        $this->user2->accounts()->attach($this->tenant2->id, ['role' => WorkspaceRole::ADMIN->value]);
     }
 
     #[Test]
-    public function applications_are_scoped_to_tenant(): void
+    public function it_scopes_applications_to_tenant(): void
     {
-        // Create application for tenant1
-        $app1 = Application::factory()->create([
-            'name' => 'GitMan App',
-            'slug' => 'gitman-app',
-        ]);
+        /* Arrange */
+        $app1 = Application::factory()->create(['name' => 'GitMan App', 'slug' => 'gitman-app']);
         $app1->accounts()->attach($this->tenant1->id);
 
-        // Create application for tenant2
-        $app2 = Application::factory()->create([
-            'name' => 'Spotivel App',
-            'slug' => 'spotivel-app',
-        ]);
+        $app2 = Application::factory()->create(['name' => 'Spotivel App', 'slug' => 'spotivel-app']);
         $app2->accounts()->attach($this->tenant2->id);
 
-        // Verify tenant1 applications
+        /* Act */
         $tenant1Apps = $this->tenant1->applications;
+        $tenant2Apps = $this->tenant2->applications;
+
+        /* Assert */
         $this->assertCount(1, $tenant1Apps);
         $this->assertEquals('GitMan App', $tenant1Apps->first()->name);
-
-        // Verify tenant2 applications
-        $tenant2Apps = $this->tenant2->applications;
         $this->assertCount(1, $tenant2Apps);
         $this->assertEquals('Spotivel App', $tenant2Apps->first()->name);
     }
 
     #[Test]
-    public function tenant_cannot_access_other_tenant_applications(): void
+    public function it_prevents_tenant_from_accessing_other_tenant_applications(): void
     {
-        // Create applications for both tenants
+        /* Arrange */
         $app1 = Application::factory()->create(['name' => 'Tenant1 App']);
         $app1->accounts()->attach($this->tenant1->id);
 
         $app2 = Application::factory()->create(['name' => 'Tenant2 App']);
         $app2->accounts()->attach($this->tenant2->id);
 
-        // Tenant1 should only see their application
+        /* Act */
         $tenant1AppIds = $this->tenant1->applications->pluck('id')->toArray();
+        $tenant2AppIds = $this->tenant2->applications->pluck('id')->toArray();
+
+        /* Assert */
         $this->assertContains($app1->id, $tenant1AppIds);
         $this->assertNotContains($app2->id, $tenant1AppIds);
-
-        // Tenant2 should only see their application
-        $tenant2AppIds = $this->tenant2->applications->pluck('id')->toArray();
         $this->assertContains($app2->id, $tenant2AppIds);
         $this->assertNotContains($app1->id, $tenant2AppIds);
     }
 
     #[Test]
-    public function user_can_access_multiple_tenants(): void
+    public function it_allows_user_to_access_multiple_tenants(): void
     {
-        // Add user1 to tenant2 as well
-        $this->user1->accounts()->attach($this->tenant2->id, ['role' => 'member']);
+        /* Arrange */
+        $this->user1->accounts()->attach($this->tenant2->id, ['role' => WorkspaceRole::MEMBER->value]);
 
-        // User should have access to both tenants
-        $this->assertCount(2, $this->user1->accounts);
-
+        /* Act */
         $accountIds = $this->user1->accounts->pluck('id')->toArray();
+
+        /* Assert */
+        $this->assertCount(2, $this->user1->accounts);
         $this->assertContains($this->tenant1->id, $accountIds);
         $this->assertContains($this->tenant2->id, $accountIds);
     }
 
     #[Test]
-    public function user_without_tenant_access_cannot_see_tenant_data(): void
+    public function it_prevents_user_without_access_from_seeing_tenant_data(): void
     {
-        // user1 should not have access to tenant2
-        $user1Accounts = $this->user1->accounts->pluck('id')->toArray();
-        $this->assertNotContains($this->tenant2->id, $user1Accounts);
+        /* Arrange */
 
-        // user2 should not have access to tenant1
+        /* Act */
+        $user1Accounts = $this->user1->accounts->pluck('id')->toArray();
         $user2Accounts = $this->user2->accounts->pluck('id')->toArray();
+
+        /* Assert */
+        $this->assertNotContains($this->tenant2->id, $user1Accounts);
         $this->assertNotContains($this->tenant1->id, $user2Accounts);
     }
 
     #[Test]
-    public function tenant_context_affects_data_queries(): void
+    public function it_uses_tenant_context_to_scope_data_queries(): void
     {
-        // Create applications for both tenants
+        /* Arrange */
         $app1 = Application::factory()->create(['name' => 'App 1']);
         $app1->accounts()->attach($this->tenant1->id);
 
         $app2 = Application::factory()->create(['name' => 'App 2']);
         $app2->accounts()->attach($this->tenant2->id);
 
-        // Set tenant1 context
+        /* Act */
         Tenancy::setTenant($this->tenant1);
-
-        // Query applications for current tenant
         $tenant1Apps = Application::whereHas('accounts', function ($query) {
             $query->where('accounts.id', Tenancy::getTenant()->id);
         })->get();
 
+        /* Assert */
         $this->assertCount(1, $tenant1Apps);
         $this->assertEquals('App 1', $tenant1Apps->first()->name);
     }
 
     #[Test]
-    public function switching_tenant_context_changes_accessible_data(): void
+    public function it_changes_accessible_data_when_switching_tenant_context(): void
     {
-        // Create applications
+        /* Arrange */
         $app1 = Application::factory()->create(['name' => 'Tenant1 App']);
         $app1->accounts()->attach($this->tenant1->id);
 
         $app2 = Application::factory()->create(['name' => 'Tenant2 App']);
         $app2->accounts()->attach($this->tenant2->id);
 
-        // Set tenant1 context
+        /* Act - Tenant 1 */
         Tenancy::setTenant($this->tenant1);
         $tenant1Apps = Application::whereHas('accounts', function ($query) {
             $query->where('accounts.id', Tenancy::getTenant()->id);
         })->get();
-        $this->assertCount(1, $tenant1Apps);
-        $this->assertEquals('Tenant1 App', $tenant1Apps->first()->name);
 
-        // Switch to tenant2 context
+        /* Act - Tenant 2 */
         Tenancy::setTenant($this->tenant2);
         $tenant2Apps = Application::whereHas('accounts', function ($query) {
             $query->where('accounts.id', Tenancy::getTenant()->id);
         })->get();
+
+        /* Assert */
+        $this->assertCount(1, $tenant1Apps);
+        $this->assertEquals('Tenant1 App', $tenant1Apps->first()->name);
         $this->assertCount(1, $tenant2Apps);
         $this->assertEquals('Tenant2 App', $tenant2Apps->first()->name);
     }
 
     #[Test]
-    public function application_can_belong_to_multiple_tenants(): void
+    public function it_allows_application_to_belong_to_multiple_tenants(): void
     {
-        // Create shared application
+        /* Arrange */
         $sharedApp = Application::factory()->create(['name' => 'Shared App']);
+
+        /* Act */
         $sharedApp->accounts()->attach([$this->tenant1->id, $this->tenant2->id]);
 
-        // Both tenants should have access
+        /* Assert */
         $this->assertTrue($this->tenant1->applications->contains($sharedApp->id));
         $this->assertTrue($this->tenant2->applications->contains($sharedApp->id));
     }
 
     #[Test]
-    public function tenant_users_are_isolated(): void
+    public function it_isolates_tenant_users(): void
     {
-        // Tenant1 should only see user1
+        /* Arrange */
+
+        /* Act */
         $tenant1UserIds = $this->tenant1->users->pluck('id')->toArray();
+        $tenant2UserIds = $this->tenant2->users->pluck('id')->toArray();
+
+        /* Assert */
         $this->assertContains($this->user1->id, $tenant1UserIds);
         $this->assertNotContains($this->user2->id, $tenant1UserIds);
-
-        // Tenant2 should only see user2
-        $tenant2UserIds = $this->tenant2->users->pluck('id')->toArray();
         $this->assertContains($this->user2->id, $tenant2UserIds);
         $this->assertNotContains($this->user1->id, $tenant2UserIds);
     }
 
     #[Test]
-    public function user_role_is_specific_to_tenant(): void
+    public function it_scopes_user_role_to_specific_tenant(): void
     {
-        // user1 is admin in tenant1
+        /* Arrange */
+        $this->user1->accounts()->attach($this->tenant2->id, ['role' => WorkspaceRole::VIEWER->value]);
+
+        /* Act */
         $pivot1 = $this->user1->accounts()->where('accounts.id', $this->tenant1->id)->first()->pivot;
-        $this->assertEquals('admin', $pivot1->role);
-
-        // Add user1 to tenant2 with different role
-        $this->user1->accounts()->attach($this->tenant2->id, ['role' => 'viewer']);
-
         $pivot2 = $this->user1->accounts()->where('accounts.id', $this->tenant2->id)->first()->pivot;
-        $this->assertEquals('viewer', $pivot2->role);
+
+        /* Assert */
+        $this->assertEquals(WorkspaceRole::ADMIN->value, $pivot1->role);
+        $this->assertEquals(WorkspaceRole::VIEWER->value, $pivot2->role);
     }
 
     #[Test]
-    public function all_tenants_are_active_by_default(): void
+    public function it_marks_all_tenants_as_active_by_default(): void
     {
+        /* Arrange & Act */
+
+        /* Assert */
         $this->assertTrue($this->tenant1->is_active);
         $this->assertTrue($this->tenant2->is_active);
     }
 
     #[Test]
-    public function can_query_only_active_tenants(): void
+    public function it_can_query_only_active_tenants(): void
     {
-        // Create inactive tenant
+        /* Arrange */
         $inactiveTenant = Account::factory()->create([
             'domain'    => 'inactive',
             'is_active' => false,
         ]);
 
+        /* Act */
         $activeTenants = Account::where('is_active', true)->get();
 
+        /* Assert */
         $this->assertTrue($activeTenants->contains($this->tenant1->id));
         $this->assertTrue($activeTenants->contains($this->tenant2->id));
         $this->assertFalse($activeTenants->contains($inactiveTenant->id));
