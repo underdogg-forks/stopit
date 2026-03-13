@@ -5,7 +5,7 @@ namespace Modules\Stopit\Services;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
 use Modules\Stopit\Models\Application;
-use Modules\Stopit\Repositories\Contracts\ApplicationRepositoryContract;
+use Modules\Stopit\Contracts\ApplicationRepositoryContract;
 use RuntimeException;
 
 class ApplicationService

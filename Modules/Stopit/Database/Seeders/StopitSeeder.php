@@ -70,7 +70,7 @@ class StopitSeeder extends Seeder
             $this->command->info('');
             $this->command->info('Admin credentials:');
             $this->command->info('Email: admin@acme.test');
-            $this->command->info('Password: (set at account creation)');
+            $this->command->info('Password: password');
         } else {
             $this->command->info('Seeder completed. Run with -v flag to see credentials.');
         }
