@@ -4,10 +4,10 @@ namespace Tests\Feature\Services;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use InvalidArgumentException;
-use Modules\Stopit\Providers\Models\Account;
-use Modules\Stopit\Providers\Models\Application;
-use Modules\Stopit\Providers\Services\ApplicationService;
-use Modules\Stopit\Providers\src\DTOs\ApplicationData;
+use Modules\Stopit\Models\Account;
+use Modules\Stopit\Models\Application;
+use Modules\Stopit\Services\ApplicationService;
+use Modules\Stopit\DTOs\ApplicationData;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;

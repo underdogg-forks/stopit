@@ -1,26 +1,24 @@
 <?php
 
-namespace App\Providers\Resources;
+namespace App\Filament\Resources;
 
-use App\Providers\Resources\ApplicationResource\Forms\ApplicationForm;
-use App\Providers\Resources\ApplicationResource\Tables\ApplicationTable;
-use BackedEnum;
+use App\Filament\Resources\ApplicationResource\Forms\ApplicationForm;
+use App\Filament\Resources\ApplicationResource\Tables\ApplicationTable;
 use Filament\Resources\Resource;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Modules\Stopit\Providers\Filament\Resources\Form;
-use Modules\Stopit\Providers\Models\Application;
+use Modules\Stopit\Models\Application;
 
 class ApplicationResource extends Resource
 {
     protected static ?string $model = Application::class;
 
-    protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-cube';
+    protected static ?string $navigationIcon = 'heroicon-o-cube';
 
     protected static ?int $navigationSort = 1;
 
-    public static function form(Form|\Filament\Schemas\Schema $schema): \Filament\Schemas\Schema
+    public static function form(\Filament\Schemas\Schema $schema): \Filament\Schemas\Schema
     {
         return $schema->schema(ApplicationForm::schema());
     }
@@ -67,10 +65,10 @@ class ApplicationResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index'  => \App\Providers\Resources\ApplicationResource\Pages\ListApplications::route('/'),
-            'create' => \App\Providers\Resources\ApplicationResource\Pages\CreateApplication::route('/create'),
-            'view'   => \App\Providers\Resources\ApplicationResource\Pages\ViewApplication::route('/{record}'),
-            'edit'   => \App\Providers\Resources\ApplicationResource\Pages\EditApplication::route('/{record}/edit'),
+            'index'  => \App\Filament\Resources\ApplicationResource\Pages\ListApplications::route('/'),
+            'create' => \App\Filament\Resources\ApplicationResource\Pages\CreateApplication::route('/create'),
+            'view'   => \App\Filament\Resources\ApplicationResource\Pages\ViewApplication::route('/{record}'),
+            'edit'   => \App\Filament\Resources\ApplicationResource\Pages\EditApplication::route('/{record}/edit'),
         ];
     }
 

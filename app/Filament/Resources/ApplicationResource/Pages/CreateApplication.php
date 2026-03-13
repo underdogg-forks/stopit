@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Providers\Resources\ApplicationResource\Pages;
+namespace App\Filament\Resources\ApplicationResource\Pages;
 
-use App\Providers\Resources\ApplicationResource;
+use App\Filament\Resources\ApplicationResource;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
-use Modules\Stopit\Providers\Services\ApplicationService;
-use Modules\Stopit\Providers\src\DTOs\ApplicationData;
+use Modules\Stopit\Services\ApplicationService;
+use Modules\Stopit\DTOs\ApplicationData;
 use RuntimeException;
 
 class CreateApplication extends CreateRecord

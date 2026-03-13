@@ -1,21 +1,20 @@
 <?php
 
-namespace App\Providers\Resources;
+namespace App\Filament\Resources;
 
-use App\Providers\Resources\ExceptionResource\Forms\ExceptionForm;
-use App\Providers\Resources\ExceptionResource\Tables\ExceptionTable;
-use BackedEnum;
+use App\Filament\Resources\ExceptionResource\Forms\ExceptionForm;
+use App\Filament\Resources\ExceptionResource\Tables\ExceptionTable;
 use Filament\Resources\Resource;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Modules\Stopit\Providers\Models\ExceptionRecord;
+use Modules\Stopit\Models\ExceptionRecord;
 
 class ExceptionResource extends Resource
 {
     protected static ?string $model = ExceptionRecord::class;
 
-    protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-exclamation-circle';
+    protected static ?string $navigationIcon = 'heroicon-o-exclamation-circle';
 
     protected static ?string $navigationLabel = 'Exceptions';
 
@@ -66,8 +65,8 @@ class ExceptionResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => \App\Providers\Resources\ExceptionResource\Pages\ListExceptions::route('/'),
-            'view'  => \App\Providers\Resources\ExceptionResource\Pages\ViewException::route('/{record}'),
+            'index' => \App\Filament\Resources\ExceptionResource\Pages\ListExceptions::route('/'),
+            'view'  => \App\Filament\Resources\ExceptionResource\Pages\ViewException::route('/{record}'),
         ];
     }
 

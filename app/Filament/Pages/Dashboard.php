@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Providers\Pages;
+namespace App\Filament\Pages;
 
 use Filament\Forms\Components\Select;
 use Filament\Pages\Dashboard as BaseDashboard;

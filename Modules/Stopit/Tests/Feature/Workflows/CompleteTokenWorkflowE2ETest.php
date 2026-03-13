@@ -3,9 +3,9 @@
 namespace Tests\Feature\Workflows;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Modules\Stopit\Providers\Models\Account;
-use Modules\Stopit\Providers\Models\Application;
-use Modules\Stopit\Providers\Models\User;
+use Modules\Stopit\Models\Account;
+use Modules\Stopit\Models\Application;
+use Modules\Stopit\Models\User;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use RuntimeException;
@@ -71,8 +71,8 @@ class CompleteTokenWorkflowE2ETest extends TestCase
         ];
 
         // Simulate form submission through the CreateApplication page handler
-        $service    = app(\Modules\Stopit\Providers\Services\ApplicationService::class);
-        $createData = new \Modules\Stopit\Providers\src\DTOs\ApplicationData();
+        $service    = app(\Modules\Stopit\Services\ApplicationService::class);
+        $createData = new \Modules\Stopit\DTOs\ApplicationData();
         $createData->setAccountId($this->gitmanAccount->id)
             ->setName($applicationData['name'])
             ->setSlug($applicationData['slug']);
@@ -167,7 +167,7 @@ class CompleteTokenWorkflowE2ETest extends TestCase
         /**
          * Step 8: Verify maintainer can see the exception in Filament.
          */
-        $exception = \Modules\Stopit\Providers\Models\ExceptionRecord::where('application_id', $application->id)->first();
+        $exception = \Modules\Stopit\Models\ExceptionRecord::where('application_id', $application->id)->first();
         $this->assertNotNull($exception);
         $this->assertEquals(1, $exception->occurrence_count);
     }
@@ -178,8 +178,8 @@ class CompleteTokenWorkflowE2ETest extends TestCase
         $this->actingAs($this->maintainer);
 
         // Create application with initial token
-        $service    = app(\Modules\Stopit\Providers\Services\ApplicationService::class);
-        $createData = new \Modules\Stopit\Providers\src\DTOs\ApplicationData();
+        $service    = app(\Modules\Stopit\Services\ApplicationService::class);
+        $createData = new \Modules\Stopit\DTOs\ApplicationData();
         $createData->setAccountId($this->gitmanAccount->id)
             ->setName('GitMan Staging')
             ->setSlug('gitman-staging');
@@ -238,8 +238,8 @@ class CompleteTokenWorkflowE2ETest extends TestCase
         $this->actingAs($this->maintainer);
 
         // Create application
-        $service    = app(\Modules\Stopit\Providers\Services\ApplicationService::class);
-        $createData = new \Modules\Stopit\Providers\src\DTOs\ApplicationData();
+        $service    = app(\Modules\Stopit\Services\ApplicationService::class);
+        $createData = new \Modules\Stopit\DTOs\ApplicationData();
         $createData->setAccountId($this->gitmanAccount->id)
             ->setName('GitMan Dev')
             ->setSlug('gitman-dev');
@@ -277,8 +277,8 @@ class CompleteTokenWorkflowE2ETest extends TestCase
         $this->actingAs($this->maintainer);
 
         // Create application and get token
-        $service    = app(\Modules\Stopit\Providers\Services\ApplicationService::class);
-        $createData = new \Modules\Stopit\Providers\src\DTOs\ApplicationData();
+        $service    = app(\Modules\Stopit\Services\ApplicationService::class);
+        $createData = new \Modules\Stopit\DTOs\ApplicationData();
         $createData->setAccountId($this->gitmanAccount->id)
             ->setName('GitMan API')
             ->setSlug('gitman-api');
@@ -309,8 +309,8 @@ class CompleteTokenWorkflowE2ETest extends TestCase
         $this->actingAs($this->maintainer);
 
         // Create application
-        $service    = app(\Modules\Stopit\Providers\Services\ApplicationService::class);
-        $createData = new \Modules\Stopit\Providers\src\DTOs\ApplicationData();
+        $service    = app(\Modules\Stopit\Services\ApplicationService::class);
+        $createData = new \Modules\Stopit\DTOs\ApplicationData();
         $createData->setAccountId($this->gitmanAccount->id)
             ->setName('GitMan API')
             ->setSlug('gitman-api');
@@ -334,7 +334,7 @@ class CompleteTokenWorkflowE2ETest extends TestCase
         // Should have only 1 record with occurrence_count = 3
         $this->assertDatabaseCount('exceptions', 1);
 
-        $exception = \Modules\Stopit\Providers\Models\ExceptionRecord::first();
+        $exception = \Modules\Stopit\Models\ExceptionRecord::first();
         $this->assertEquals(3, $exception->occurrence_count);
     }
 
@@ -343,10 +343,10 @@ class CompleteTokenWorkflowE2ETest extends TestCase
     {
         $this->actingAs($this->maintainer);
 
-        $service = app(\Modules\Stopit\Providers\Services\ApplicationService::class);
+        $service = app(\Modules\Stopit\Services\ApplicationService::class);
 
         // Create two applications
-        $app1Data = new \Modules\Stopit\Providers\src\DTOs\ApplicationData();
+        $app1Data = new \Modules\Stopit\DTOs\ApplicationData();
         $app1Data->setAccountId($this->gitmanAccount->id)
             ->setName('GitMan Frontend')
             ->setSlug('gitman-frontend');
@@ -354,7 +354,7 @@ class CompleteTokenWorkflowE2ETest extends TestCase
         $app1    = $result1['application'];
         $token1  = $result1['plain_token'];
 
-        $app2Data = new \Modules\Stopit\Providers\src\DTOs\ApplicationData();
+        $app2Data = new \Modules\Stopit\DTOs\ApplicationData();
         $app2Data->setAccountId($this->gitmanAccount->id)
             ->setName('GitMan Backend')
             ->setSlug('gitman-backend');

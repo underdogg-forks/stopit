@@ -58,7 +58,7 @@ Types:
 - `chore`: Build process or auxiliary tool changes
 
 Example:
-```
+```text
 feat: add exception filtering by date range
 fix: resolve token validation issue for long tokens
 docs: update API reference with new endpoints

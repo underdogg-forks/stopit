@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Providers\Resources\ExceptionResource\Forms;
+namespace App\Filament\Resources\ExceptionResource\Forms;
 
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\KeyValue;
@@ -82,7 +82,8 @@ class ExceptionForm
                 ->disabled(),
 
             Checkbox::make('is_resolved')
-                ->default(false),
+                ->default(false)
+                ->disabled(),
         ];
     }
 }

@@ -4,10 +4,10 @@ namespace Tests\Feature\Workflows;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use InvalidArgumentException;
-use Modules\Stopit\Providers\Models\Account;
-use Modules\Stopit\Providers\Models\Application;
-use Modules\Stopit\Providers\Models\User;
-use Modules\Stopit\Providers\Services\ApplicationService;
+use Modules\Stopit\Models\Account;
+use Modules\Stopit\Models\Application;
+use Modules\Stopit\Models\User;
+use Modules\Stopit\Services\ApplicationService;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use RuntimeException;
@@ -67,7 +67,7 @@ class ApplicationTokenWorkflowTest extends TestCase
         /**
          * Step 2: User creates a new application and receives API token.
          */
-        $applicationData = new \Modules\Stopit\Providers\src\DTOs\ApplicationData();
+        $applicationData = new \Modules\Stopit\DTOs\ApplicationData();
         $applicationData->setAccountId($this->account->id)
             ->setName('GitMan API')
             ->setSlug('gitman-api');
@@ -153,7 +153,7 @@ class ApplicationTokenWorkflowTest extends TestCase
         $this->actingAs($orphanUser);
 
         // Attempting to create application should fail
-        $applicationData = new \Modules\Stopit\Providers\src\DTOs\ApplicationData();
+        $applicationData = new \Modules\Stopit\DTOs\ApplicationData();
         $applicationData->setAccountId(999) // Non-existent account
             ->setName('Test App')
             ->setSlug('test-app');
@@ -175,7 +175,7 @@ class ApplicationTokenWorkflowTest extends TestCase
         $this->actingAs($this->user);
 
         // Create application with initial token
-        $applicationData = new \Modules\Stopit\Providers\src\DTOs\ApplicationData();
+        $applicationData = new \Modules\Stopit\DTOs\ApplicationData();
         $applicationData->setAccountId($this->account->id)
             ->setName('GitMan API')
             ->setSlug('gitman-api');
@@ -268,7 +268,7 @@ class ApplicationTokenWorkflowTest extends TestCase
         $this->actingAs($this->user);
 
         // Create application
-        $applicationData = new \Modules\Stopit\Providers\src\DTOs\ApplicationData();
+        $applicationData = new \Modules\Stopit\DTOs\ApplicationData();
         $applicationData->setAccountId($this->account->id)
             ->setName('GitMan API')
             ->setSlug('gitman-api');
@@ -301,7 +301,7 @@ class ApplicationTokenWorkflowTest extends TestCase
         $this->actingAs($this->user);
 
         // Create application and get token
-        $applicationData = new \Modules\Stopit\Providers\src\DTOs\ApplicationData();
+        $applicationData = new \Modules\Stopit\DTOs\ApplicationData();
         $applicationData->setAccountId($this->account->id)
             ->setName('GitMan API')
             ->setSlug('gitman-api');
@@ -336,7 +336,7 @@ class ApplicationTokenWorkflowTest extends TestCase
         $this->actingAs($this->user);
 
         // Create two applications under the same account
-        $app1Data = new \Modules\Stopit\Providers\src\DTOs\ApplicationData();
+        $app1Data = new \Modules\Stopit\DTOs\ApplicationData();
         $app1Data->setAccountId($this->account->id)
             ->setName('GitMan Frontend')
             ->setSlug('gitman-frontend');
@@ -345,7 +345,7 @@ class ApplicationTokenWorkflowTest extends TestCase
         $app1    = $result1['application'];
         $token1  = $result1['plain_token'];
 
-        $app2Data = new \Modules\Stopit\Providers\src\DTOs\ApplicationData();
+        $app2Data = new \Modules\Stopit\DTOs\ApplicationData();
         $app2Data->setAccountId($this->account->id)
             ->setName('GitMan Backend')
             ->setSlug('gitman-backend');
@@ -384,7 +384,7 @@ class ApplicationTokenWorkflowTest extends TestCase
 
         // Our user creates an application
         $this->actingAs($this->user);
-        $appData = new \Modules\Stopit\Providers\src\DTOs\ApplicationData();
+        $appData = new \Modules\Stopit\DTOs\ApplicationData();
         $appData->setAccountId($this->account->id)
             ->setName('GitMan API')
             ->setSlug('gitman-api');
@@ -394,7 +394,7 @@ class ApplicationTokenWorkflowTest extends TestCase
 
         // Other user creates an application
         $this->actingAs($otherUser);
-        $otherAppData = new \Modules\Stopit\Providers\src\DTOs\ApplicationData();
+        $otherAppData = new \Modules\Stopit\DTOs\ApplicationData();
         $otherAppData->setAccountId($otherAccount->id)
             ->setName('Other API')
             ->setSlug('other-api');
@@ -416,7 +416,7 @@ class ApplicationTokenWorkflowTest extends TestCase
         $this->actingAs($this->user);
 
         // Create application
-        $applicationData = new \Modules\Stopit\Providers\src\DTOs\ApplicationData();
+        $applicationData = new \Modules\Stopit\DTOs\ApplicationData();
         $applicationData->setAccountId($this->account->id)
             ->setName('GitMan API')
             ->setSlug('gitman-api');
@@ -449,7 +449,7 @@ class ApplicationTokenWorkflowTest extends TestCase
         $this->actingAs($this->user);
 
         // Create application
-        $applicationData = new \Modules\Stopit\Providers\src\DTOs\ApplicationData();
+        $applicationData = new \Modules\Stopit\DTOs\ApplicationData();
         $applicationData->setAccountId($this->account->id)
             ->setName('GitMan API')
             ->setSlug('gitman-api');
@@ -477,7 +477,7 @@ class ApplicationTokenWorkflowTest extends TestCase
         $this->actingAs($this->user);
 
         // Test missing name
-        $data1 = new \Modules\Stopit\Providers\src\DTOs\ApplicationData();
+        $data1 = new \Modules\Stopit\DTOs\ApplicationData();
         $data1->setAccountId($this->account->id)
             ->setName('')
             ->setSlug('test-slug');
@@ -493,7 +493,7 @@ class ApplicationTokenWorkflowTest extends TestCase
         $this->actingAs($this->user);
 
         // Create application
-        $applicationData = new \Modules\Stopit\Providers\src\DTOs\ApplicationData();
+        $applicationData = new \Modules\Stopit\DTOs\ApplicationData();
         $applicationData->setAccountId($this->account->id)
             ->setName('GitMan API')
             ->setSlug('gitman-api');
@@ -517,7 +517,7 @@ class ApplicationTokenWorkflowTest extends TestCase
         // Should have only 1 record with occurrence_count = 3
         $this->assertDatabaseCount('exceptions', 1);
 
-        $exception = \Modules\Stopit\Providers\Models\ExceptionRecord::first();
+        $exception = \Modules\Stopit\Models\ExceptionRecord::first();
         $this->assertEquals(3, $exception->occurrence_count);
         $this->assertEquals('DatabaseException', $exception->exception_class);
         $this->assertEquals('Connection timeout', $exception->message);

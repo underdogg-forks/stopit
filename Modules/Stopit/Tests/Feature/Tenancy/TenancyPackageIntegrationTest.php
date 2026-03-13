@@ -3,8 +3,8 @@
 namespace Tests\Feature\Tenancy;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Modules\Stopit\Providers\Models\Account;
-use Modules\Stopit\Providers\Models\User;
+use Modules\Stopit\Models\Account;
+use Modules\Stopit\Models\User;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use Tenancy\Facades\Tenancy;

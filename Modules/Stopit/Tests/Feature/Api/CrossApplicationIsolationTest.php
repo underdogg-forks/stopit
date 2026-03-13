@@ -3,9 +3,9 @@
 namespace Tests\Feature\Api;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Modules\Stopit\Providers\Models\Account;
-use Modules\Stopit\Providers\Models\Application;
-use Modules\Stopit\Providers\Models\ExceptionRecord;
+use Modules\Stopit\Models\Account;
+use Modules\Stopit\Models\Application;
+use Modules\Stopit\Models\ExceptionRecord;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;

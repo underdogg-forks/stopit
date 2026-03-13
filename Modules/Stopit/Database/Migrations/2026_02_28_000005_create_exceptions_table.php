@@ -25,7 +25,7 @@ return new class () extends Migration {
             $table->string('severity', 20)->default('error');
             $table->unsignedBigInteger('occurrence_count')->default(1);
             $table->boolean('is_resolved')->default(false);
-            $table->timestamp('first_occurred_at')->nullable();
+            $table->timestamp('first_occurred_at')->useCurrent();
             $table->timestamp('last_occurred_at')->nullable();
             $table->timestamps();
 
