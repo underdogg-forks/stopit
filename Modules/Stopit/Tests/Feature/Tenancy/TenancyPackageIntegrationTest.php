@@ -176,9 +176,10 @@ class TenancyPackageIntegrationTest extends TestCase
             'domain'    => 'inactive',
             'is_active' => false,
         ]);
+        $baseDomain = config('tenancy.central_domains')[0] ?? 'stopit.dev';
 
         /* Act */
-        Tenancy::setTenant($inactiveTenant);
+        $response = $this->get('/', ['HTTP_HOST' => "inactive.{$baseDomain}"]);
 
         /* Assert */
         $this->assertTrue(Tenancy::isActive());

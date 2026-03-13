@@ -46,16 +46,26 @@ class StopitSeeder extends Seeder
         }
 
         foreach ($applications as $appData) {
-            $plainToken  = Str::random(64);
-            $hashedToken = hash('sha256', $plainToken);
-
             $application = Application::firstOrCreate(
                 ['slug' => $appData['slug']],
-                [
-                    'name'      => $appData['name'],
-                    'api_token' => $hashedToken,
-                ]
+                function () use ($appData) {
+                    $plainToken  = Str::random(64);
+                    $hashedToken = hash('sha256', $plainToken);
+
+                    return [
+                        'name'      => $appData['name'],
+                        'api_token' => $hashedToken,
+                    ];
+                }
             );
+
+            // Generate token only if application was just created
+            $plainToken = null;
+            if ($application->wasRecentlyCreated) {
+                $plainToken  = Str::random(64);
+                $hashedToken = hash('sha256', $plainToken);
+                $application->update(['api_token' => $hashedToken]);
+            }
 
             // Attach application to account if not already attached
             if ( ! $application->accounts()->where('accounts.id', $account->id)->exists()) {
@@ -65,7 +75,7 @@ class StopitSeeder extends Seeder
             // Only print the token when the application was freshly created.
             // On re-runs, the stored token hash won't match the newly generated
             // plain token, so printing it would be misleading.
-            if ($verbose && $application->wasRecentlyCreated) {
+            if ($verbose && $application->wasRecentlyCreated && $plainToken !== null) {
                 $this->command->info("{$appData['name']}: {$plainToken}");
             }
         }

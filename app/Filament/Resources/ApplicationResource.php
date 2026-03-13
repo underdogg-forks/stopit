@@ -18,9 +18,9 @@ class ApplicationResource extends Resource
 
     protected static ?int $navigationSort = 1;
 
-    public static function form(\Filament\Schemas\Schema $schema): \Filament\Schemas\Schema
+    public static function form(\Filament\Forms\Form $form): \Filament\Forms\Form
     {
-        return $schema->schema(ApplicationForm::schema());
+        return $form->schema(ApplicationForm::schema());
     }
 
     public static function table(Table $table): Table

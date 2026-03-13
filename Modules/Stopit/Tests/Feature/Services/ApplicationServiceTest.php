@@ -4,7 +4,6 @@ namespace Tests\Feature\Services;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use InvalidArgumentException;
-use Modules\Core\Enums\WorkspaceRole;
 use Modules\Stopit\DTOs\ApplicationData;
 use Modules\Stopit\Models\Account;
 use Modules\Stopit\Models\Application;

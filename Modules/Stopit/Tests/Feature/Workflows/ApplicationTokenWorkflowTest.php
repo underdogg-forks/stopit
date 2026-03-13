@@ -127,13 +127,16 @@ class ApplicationTokenWorkflowTest extends TestCase
         ]);
         $this->actingAs($orphanUser);
 
+        $applicationData = new ApplicationData();
+        $applicationData->setAccountId(999999)
+            ->setName('Test App')
+            ->setSlug('test-app');
+
         /* Act & Assert */
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('User must belong to at least one account');
 
-        if ( ! $orphanUser->accounts()->exists()) {
-            throw new RuntimeException('User must belong to at least one account to create an application.');
-        }
+        $this->applicationService->createApplication($applicationData);
     }
 
     #[Test]

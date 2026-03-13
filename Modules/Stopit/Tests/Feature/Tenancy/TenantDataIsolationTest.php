@@ -66,6 +66,12 @@ class TenantDataIsolationTest extends TestCase
         $this->user2->accounts()->attach($this->tenant2->id, ['role' => WorkspaceRole::ADMIN->value]);
     }
 
+    protected function tearDown(): void
+    {
+        Tenancy::clearTenant();
+        parent::tearDown();
+    }
+
     #[Test]
     public function it_scopes_applications_to_tenant(): void
     {
@@ -236,10 +242,14 @@ class TenantDataIsolationTest extends TestCase
     public function it_marks_all_tenants_as_active_by_default(): void
     {
         /* Arrange & Act */
+        $newTenant = Account::factory()->create(['domain' => 'new-tenant']);
 
         /* Assert */
-        $this->assertTrue($this->tenant1->is_active);
-        $this->assertTrue($this->tenant2->is_active);
+        $this->assertTrue($newTenant->is_active);
+        $this->assertDatabaseHas('accounts', [
+            'id'        => $newTenant->id,
+            'is_active' => true,
+        ]);
     }
 
     #[Test]

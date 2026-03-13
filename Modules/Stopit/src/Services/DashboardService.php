@@ -3,6 +3,7 @@
 namespace Modules\Stopit\Services;
 
 use Illuminate\Support\Collection;
+use Modules\Core\Enums\Severity;
 use Modules\Stopit\Contracts\ExceptionRepositoryContract;
 
 class DashboardService
@@ -13,11 +14,11 @@ class DashboardService
 
     public function getRecentExceptions(int $applicationId, ?int $accountId = null): Collection
     {
-        if ($applicationId !== 0) {
+        if ($applicationId > 0) {
             return $this->repository->getRecent($applicationId, 10);
         }
 
-        if ($accountId !== null) {
+        if ($accountId !== null && $accountId > 0) {
             return $this->repository->getRecentForAccount($accountId, 10);
         }
 
@@ -26,29 +27,28 @@ class DashboardService
 
     public function getCountBySeverity(int $applicationId, ?int $accountId = null): array
     {
-        if ($applicationId !== 0) {
+        if ($applicationId > 0) {
             return $this->repository->getCountBySeverity($applicationId);
         }
 
-        if ($accountId !== null) {
+        if ($accountId !== null && $accountId > 0) {
             return $this->repository->getCountBySeverityForAccount($accountId);
         }
 
-        return [
-            'info'     => 0,
-            'warning'  => 0,
-            'error'    => 0,
-            'critical' => 0,
-        ];
+        return array_reduce(
+            Severity::cases(),
+            fn ($carry, $severity) => $carry + [$severity->value => 0],
+            []
+        );
     }
 
     public function getCountByClass(int $applicationId, ?int $accountId = null): array
     {
-        if ($applicationId !== 0) {
+        if ($applicationId > 0) {
             return $this->repository->getCountByClass($applicationId);
         }
 
-        if ($accountId !== null) {
+        if ($accountId !== null && $accountId > 0) {
             return $this->repository->getCountByClassForAccount($accountId);
         }
 

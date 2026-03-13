@@ -80,8 +80,7 @@ class CompleteTokenWorkflowE2ETest extends TestCase
         $bearerToken = $result['plain_token'];
 
         $hashedToken  = hash('sha256', $bearerToken);
-        $copiedToken  = $bearerToken;
-        $validatedApp = $this->service->validateToken($copiedToken);
+        $validatedApp = $this->service->validateToken($bearerToken);
 
         $response = $this->postJson('/api/v1/exceptions', [
             'exception_class' => 'RuntimeException',
@@ -90,7 +89,7 @@ class CompleteTokenWorkflowE2ETest extends TestCase
             'line'            => 127,
             'severity'        => 'error',
         ], [
-            'Authorization' => "Bearer {$copiedToken}",
+            'Authorization' => "Bearer {$bearerToken}",
             'Accept'        => 'application/json',
         ]);
 
