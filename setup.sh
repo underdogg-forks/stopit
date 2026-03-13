@@ -53,7 +53,15 @@ mkdir -p storage/framework/{sessions,views,cache,testing}
 mkdir -p storage/app/public
 mkdir -p storage/logs
 
-# Guard destructive operations to safe environments only
+# Guard destructive operations to safe environments only.
+# Read APP_ENV from the .env file (if present) so the guard reflects the
+# actual configured environment rather than just the shell's exported variable.
+if [ -f .env ]; then
+    FILE_ENV=$(grep -E '^APP_ENV=' .env | head -1 | cut -d '=' -f2 | tr -d "\"' ")
+    if [ -n "$FILE_ENV" ]; then
+        APP_ENV="$FILE_ENV"
+    fi
+fi
 APP_ENV="${APP_ENV:-local}"
 SAFE_ENVS="local testing ci development"
 

@@ -19,10 +19,6 @@ class ExceptionController extends Controller
     {
         $application = $request->attributes->get('application');
 
-        if ( ! $application) {
-            return response()->json(['message' => 'Unauthorized'], 403);
-        }
-
         $data = $this->transformer->fromRequest($request);
 
         $exception = $this->service->reportException($application->id, $data);

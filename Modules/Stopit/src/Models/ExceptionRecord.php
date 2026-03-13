@@ -5,7 +5,6 @@ namespace Modules\Stopit\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Modules\Core\Enums\HttpMethod;
 use Modules\Core\Enums\Severity;
 
 class ExceptionRecord extends Model
@@ -31,7 +30,6 @@ class ExceptionRecord extends Model
             'is_resolved'       => 'boolean',
             'last_occurred_at'  => 'datetime',
             'occurrence_count'  => 'integer',
-            'request_method'    => HttpMethod::class,
             'severity'          => Severity::class,
         ];
     }

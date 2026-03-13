@@ -5,7 +5,6 @@ namespace Modules\Stopit\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Modules\Core\Enums\WorkspaceRole;
 use Tenancy\Identification\Contracts\Tenant;
 
 class Account extends Model implements Tenant
