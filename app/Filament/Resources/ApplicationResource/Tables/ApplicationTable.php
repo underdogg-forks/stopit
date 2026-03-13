@@ -48,7 +48,7 @@ class ApplicationTable
 
                     Notification::make()
                         ->title('Token Regenerated Successfully')
-                        ->body('Your new API token has been generated. Copy it from the token field before navigating away.')
+                        ->body('Your new API token has been generated. View the application record to copy your new token.')
                         ->success()
                         ->persistent()
                         ->send();

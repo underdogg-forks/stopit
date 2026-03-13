@@ -26,13 +26,13 @@ class DashboardServiceTest extends TestCase
         $this->service = app(DashboardService::class);
     }
 
-    private function createApplicationWithAccount(?Account $account = null): Application
+    private function createApplicationWithAccount(?Account $account = null): array
     {
         $account     = $account ?? Account::factory()->create();
         $application = Application::factory()->create();
         $application->accounts()->attach($account->id);
 
-        return $application;
+        return ['application' => $application, 'account' => $account];
     }
 
     // -------------------------------------------------------------------------
@@ -43,7 +43,7 @@ class DashboardServiceTest extends TestCase
     public function it_returns_recent_exceptions_limited_to_10(): void
     {
         /* Arrange */
-        $application = $this->createApplicationWithAccount();
+        ['application' => $application] = $this->createApplicationWithAccount();
         ExceptionRecord::factory()->count(15)->create(['application_id' => $application->id]);
 
         /* Act */
@@ -57,7 +57,7 @@ class DashboardServiceTest extends TestCase
     public function it_returns_all_severity_keys_with_counts(): void
     {
         /* Arrange */
-        $application = $this->createApplicationWithAccount();
+        ['application' => $application] = $this->createApplicationWithAccount();
         ExceptionRecord::factory()->create([
             'application_id' => $application->id,
             'severity'       => Severity::INFO->value,
@@ -85,7 +85,7 @@ class DashboardServiceTest extends TestCase
     public function it_returns_count_by_exception_class(): void
     {
         /* Arrange */
-        $application = $this->createApplicationWithAccount();
+        ['application' => $application] = $this->createApplicationWithAccount();
         ExceptionRecord::factory()->count(3)->create([
             'application_id'  => $application->id,
             'exception_class' => 'RuntimeException',
@@ -125,7 +125,7 @@ class DashboardServiceTest extends TestCase
     public function it_orders_recent_exceptions_by_last_occurred_at_desc(): void
     {
         /* Arrange */
-        $application = $this->createApplicationWithAccount();
+        ['application' => $application] = $this->createApplicationWithAccount();
 
         $oldest = ExceptionRecord::factory()->create([
             'application_id'   => $application->id,
@@ -158,8 +158,8 @@ class DashboardServiceTest extends TestCase
     {
         /* Arrange */
         $account = Account::factory()->create();
-        $app1    = $this->createApplicationWithAccount($account);
-        $app2    = $this->createApplicationWithAccount($account);
+        ['application' => $app1] = $this->createApplicationWithAccount($account);
+        ['application' => $app2] = $this->createApplicationWithAccount($account);
 
         ExceptionRecord::factory()->count(6)->create(['application_id' => $app1->id]);
         ExceptionRecord::factory()->count(6)->create(['application_id' => $app2->id]);
@@ -177,8 +177,8 @@ class DashboardServiceTest extends TestCase
     {
         /* Arrange */
         $account = Account::factory()->create();
-        $app1    = $this->createApplicationWithAccount($account);
-        $app2    = $this->createApplicationWithAccount($account);
+        ['application' => $app1] = $this->createApplicationWithAccount($account);
+        ['application' => $app2] = $this->createApplicationWithAccount($account);
 
         ExceptionRecord::factory()->count(2)->create([
             'application_id' => $app1->id,
@@ -208,8 +208,8 @@ class DashboardServiceTest extends TestCase
     {
         /* Arrange */
         $account = Account::factory()->create();
-        $app1    = $this->createApplicationWithAccount($account);
-        $app2    = $this->createApplicationWithAccount($account);
+        ['application' => $app1] = $this->createApplicationWithAccount($account);
+        ['application' => $app2] = $this->createApplicationWithAccount($account);
 
         ExceptionRecord::factory()->count(3)->create([
             'application_id'  => $app1->id,
@@ -238,8 +238,8 @@ class DashboardServiceTest extends TestCase
         /* Arrange */
         $account1 = Account::factory()->create();
         $account2 = Account::factory()->create();
-        $app1     = $this->createApplicationWithAccount($account1);
-        $app2     = $this->createApplicationWithAccount($account2);
+        ['application' => $app1] = $this->createApplicationWithAccount($account1);
+        ['application' => $app2] = $this->createApplicationWithAccount($account2);
 
         ExceptionRecord::factory()->count(3)->create([
             'application_id' => $app1->id,
@@ -264,7 +264,7 @@ class DashboardServiceTest extends TestCase
     {
         /* Arrange */
         $account = Account::factory()->create();
-        $app     = $this->createApplicationWithAccount($account);
+        ['application' => $app] = $this->createApplicationWithAccount($account);
         ExceptionRecord::factory()->count(5)->create(['application_id' => $app->id]);
 
         /* Act */
@@ -279,7 +279,7 @@ class DashboardServiceTest extends TestCase
     {
         /* Arrange */
         $account = Account::factory()->create();
-        $app     = $this->createApplicationWithAccount($account);
+        ['application' => $app] = $this->createApplicationWithAccount($account);
         ExceptionRecord::factory()->create(['application_id' => $app->id]);
 
         /* Act */

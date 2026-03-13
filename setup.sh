@@ -7,6 +7,33 @@ set -e
 echo "🚀 Setting up Stopit Exception Monitoring Platform..."
 echo ""
 
+# Guard destructive operations to safe environments only.
+# Read APP_ENV from the .env file (if present) so the guard reflects the
+# actual configured environment rather than just the shell's exported variable.
+if [ -f .env ]; then
+    FILE_ENV=$(grep -E '^APP_ENV=' .env | head -1 | cut -d '=' -f2 | tr -d "\"' ")
+    if [ -n "$FILE_ENV" ]; then
+        APP_ENV="$FILE_ENV"
+    fi
+fi
+APP_ENV="${APP_ENV:-local}"
+SAFE_ENVS="local testing ci development"
+
+is_safe_env() {
+    for env in $SAFE_ENVS; do
+        if [ "$APP_ENV" = "$env" ]; then
+            return 0
+        fi
+    done
+    return 1
+}
+
+if ! is_safe_env; then
+    echo "❌ Refusing to run setup in APP_ENV=${APP_ENV}."
+    echo "   Only allowed in: ${SAFE_ENVS}"
+    exit 1
+fi
+
 # Check if composer is installed
 if ! command -v composer &> /dev/null; then
     echo "❌ Composer not found. Please install Composer first."
@@ -52,33 +79,6 @@ echo "📁 Creating storage directories..."
 mkdir -p storage/framework/{sessions,views,cache,testing}
 mkdir -p storage/app/public
 mkdir -p storage/logs
-
-# Guard destructive operations to safe environments only.
-# Read APP_ENV from the .env file (if present) so the guard reflects the
-# actual configured environment rather than just the shell's exported variable.
-if [ -f .env ]; then
-    FILE_ENV=$(grep -E '^APP_ENV=' .env | head -1 | cut -d '=' -f2 | tr -d "\"' ")
-    if [ -n "$FILE_ENV" ]; then
-        APP_ENV="$FILE_ENV"
-    fi
-fi
-APP_ENV="${APP_ENV:-local}"
-SAFE_ENVS="local testing ci development"
-
-is_safe_env() {
-    for env in $SAFE_ENVS; do
-        if [ "$APP_ENV" = "$env" ]; then
-            return 0
-        fi
-    done
-    return 1
-}
-
-if ! is_safe_env; then
-    echo "❌ Refusing to run migrations/seeds in APP_ENV=${APP_ENV}."
-    echo "   Only allowed in: ${SAFE_ENVS}"
-    exit 1
-fi
 
 # Run Migrations
 echo "🗄️  Running migrations..."

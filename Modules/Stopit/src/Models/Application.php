@@ -11,7 +11,7 @@ class Application extends Model
 {
     use HasFactory;
 
-    protected $guarded = [];
+    protected $guarded = ['api_token'];
 
     protected $hidden = [
         'api_token',
@@ -35,4 +35,3 @@ class Application extends Model
         return \Modules\Stopit\Database\Factories\ApplicationFactory::new();
     }
 }
-

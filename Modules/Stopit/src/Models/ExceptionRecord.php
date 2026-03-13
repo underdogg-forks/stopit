@@ -13,7 +13,12 @@ class ExceptionRecord extends Model
 
     protected $table = 'exceptions';
 
-    protected $guarded = [];
+    protected $guarded = [
+        'is_resolved',
+        'occurrence_count',
+        'created_at',
+        'updated_at',
+    ];
 
     // Relationships (alphabetical)
 
@@ -39,4 +44,3 @@ class ExceptionRecord extends Model
         return \Modules\Stopit\Database\Factories\ExceptionRecordFactory::new();
     }
 }
-

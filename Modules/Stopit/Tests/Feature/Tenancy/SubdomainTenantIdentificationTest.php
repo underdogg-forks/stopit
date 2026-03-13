@@ -58,7 +58,7 @@ class SubdomainTenantIdentificationTest extends TestCase
         $response = $this->get('/', ['HTTP_HOST' => "gitman.{$baseDomain}"]);
 
         /* Assert */
-        $this->assertNotEquals(404, $response->status());
+        $this->assertEquals(200, $response->status());
     }
 
     #[Test]
@@ -71,7 +71,7 @@ class SubdomainTenantIdentificationTest extends TestCase
         $response = $this->get('/', ['HTTP_HOST' => $baseDomain]);
 
         /* Assert */
-        $this->assertNotEquals(404, $response->status());
+        $this->assertEquals(302, $response->status());
     }
 
     #[Test]
@@ -84,7 +84,7 @@ class SubdomainTenantIdentificationTest extends TestCase
         $response = $this->get('/', ['HTTP_HOST' => "nonexistent.{$baseDomain}"]);
 
         /* Assert */
-        $this->assertIsInt($response->status());
+        $this->assertEquals(404, $response->status());
     }
 
     #[Test]
@@ -163,7 +163,7 @@ class SubdomainTenantIdentificationTest extends TestCase
         $this->assertNotNull($this->tenant);
 
         /* Act & Assert */
-        $this->expectException(\Exception::class);
+        $this->expectException(\Illuminate\Database\QueryException::class);
         Account::factory()->create(['domain' => 'gitman']);
     }
 

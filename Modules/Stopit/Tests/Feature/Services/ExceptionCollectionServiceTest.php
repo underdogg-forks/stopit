@@ -149,13 +149,21 @@ class ExceptionCollectionServiceTest extends TestCase
     public function it_returns_grouped_exceptions_including_resolved_and_unresolved(): void
     {
         /* Arrange */
-        ExceptionRecord::factory()->count(5)->create([
+        // Create some with duplicate fingerprints to verify grouping
+        ExceptionRecord::factory()->count(3)->create([
             'application_id' => $this->application->id,
             'is_resolved'    => false,
+            'fingerprint'    => 'unique-fingerprint-1',
+        ]);
+        ExceptionRecord::factory()->count(2)->create([
+            'application_id' => $this->application->id,
+            'is_resolved'    => false,
+            'fingerprint'    => 'unique-fingerprint-2',
         ]);
         ExceptionRecord::factory()->count(2)->create([
             'application_id' => $this->application->id,
             'is_resolved'    => true,
+            'fingerprint'    => 'unique-fingerprint-3',
         ]);
 
         /* Act */
@@ -171,9 +179,21 @@ class ExceptionCollectionServiceTest extends TestCase
     public function it_returns_grouped_exceptions_as_collection_of_exception_records(): void
     {
         /* Arrange */
-        ExceptionRecord::factory()->count(3)->create([
+        // Create with duplicate fingerprints to test collision handling
+        ExceptionRecord::factory()->create([
             'application_id' => $this->application->id,
             'is_resolved'    => false,
+            'fingerprint'    => 'duplicate-fp',
+        ]);
+        ExceptionRecord::factory()->create([
+            'application_id' => $this->application->id,
+            'is_resolved'    => false,
+            'fingerprint'    => 'duplicate-fp',
+        ]);
+        ExceptionRecord::factory()->create([
+            'application_id' => $this->application->id,
+            'is_resolved'    => false,
+            'fingerprint'    => 'unique-fp',
         ]);
 
         /* Act */
