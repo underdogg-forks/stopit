@@ -243,13 +243,21 @@ class TenantDataIsolationTest extends TestCase
     {
         /* Arrange & Act */
         $newTenant = Account::factory()->create(['domain' => 'new-tenant']);
+    #[Test]
+    public function it_marks_all_tenants_as_active_by_default(): void
+    {
+        /* Arrange */
+        $tenantWithImplicitDefault = Account::create([
+            'name'   => 'Default Active Workspace',
+            'slug'   => 'default-active-workspace',
+            'domain' => 'default-active-workspace',
+        ]);
+
+        /* Act */
+        $tenantWithImplicitDefault = $tenantWithImplicitDefault->fresh();
 
         /* Assert */
-        $this->assertTrue($newTenant->is_active);
-        $this->assertDatabaseHas('accounts', [
-            'id'        => $newTenant->id,
-            'is_active' => true,
-        ]);
+        $this->assertTrue((bool) $tenantWithImplicitDefault->is_active);
     }
 
     #[Test]

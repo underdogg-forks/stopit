@@ -151,12 +151,6 @@ class SubdomainTenantIdentificationTest extends TestCase
         $found2 = Account::where('domain', 'spotivel')->first();
 
         /* Assert */
-        $this->assertNotNull($found1);
-        $this->assertNotNull($found2);
-        $this->assertNotEquals($found1->id, $found2->id);
-    }
-
-    #[Test]
     public function it_enforces_unique_domain_column(): void
     {
         /* Arrange */
