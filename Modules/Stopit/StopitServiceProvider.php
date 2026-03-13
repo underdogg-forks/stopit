@@ -11,22 +11,21 @@ use Modules\Stopit\Repositories\ExceptionRepository;
 
 class StopitServiceProvider extends ServiceProvider
 {
+    /**
+     * This provider is kept for backwards compatibility but intentionally
+     * does not register bindings. Use Modules\Stopit\Providers\StopitServiceProvider instead.
+     */
     public function register(): void
     {
-        $this->app->bind(ExceptionRepositoryContract::class, ExceptionRepository::class);
-        $this->app->bind(ApplicationRepositoryContract::class, ApplicationRepository::class);
+        // No-op: bindings are handled by the canonical module service provider.
     }
 
+    /**
+     * This provider is kept for backwards compatibility but intentionally
+     * does not register routes, migrations, or views to avoid duplication.
+     */
     public function boot(): void
     {
-        $this->loadMigrationsFrom(__DIR__ . '/Database/Migrations');
-
-        $this->loadViewsFrom(__DIR__ . '/resources/views', 'stopit');
-
-        Route::prefix('api')
-            ->middleware(['api'])
-            ->group(function () {
-                require __DIR__ . '/Routes/Api/api.php';
-            });
+        // No-op: bootstrapping is handled by the canonical module service provider.
     }
 }
