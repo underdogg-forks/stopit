@@ -6,7 +6,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 use Modules\Stopit\Models\ExceptionRecord;
-use Modules\Stopit\Repositories\Contracts\ExceptionRepositoryContract;
+use Modules\Stopit\Contracts\ExceptionRepositoryContract;
 
 class ExceptionCollectionService
 {
