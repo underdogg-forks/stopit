@@ -3,6 +3,7 @@
 namespace Modules\Stopit\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Modules\Core\Enums\HttpMethod;
 use Modules\Core\Enums\Severity;
 
 class StoreExceptionRequest extends FormRequest
@@ -15,6 +16,7 @@ class StoreExceptionRequest extends FormRequest
     public function rules(): array
     {
         $severityValues = implode(',', array_map(fn ($case) => $case->value, Severity::cases()));
+        $methodValues   = implode(',', array_map(fn ($case) => $case->value, HttpMethod::cases()));
 
         return [
             'exception_class' => ['required', 'string', 'max:500'],
@@ -22,7 +24,7 @@ class StoreExceptionRequest extends FormRequest
             'file'            => ['nullable', 'string', 'max:1000'],
             'line'            => ['nullable', 'integer', 'min:0'],
             'stack_trace'     => ['nullable', 'string'],
-            'request_method'  => ['nullable', 'string', 'max:10'],
+            'request_method'  => ['nullable', 'string', 'in:' . $methodValues],
             'request_url'     => ['nullable', 'string', 'max:2048'],
             'headers'         => ['nullable', 'string'],
             'user_agent'      => ['nullable', 'string', 'max:1000'],

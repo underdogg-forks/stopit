@@ -62,7 +62,10 @@ class StopitSeeder extends Seeder
                 $application->accounts()->attach($account->id);
             }
 
-            if ($verbose) {
+            // Only print the token when the application was freshly created.
+            // On re-runs, the stored token hash won't match the newly generated
+            // plain token, so printing it would be misleading.
+            if ($verbose && $application->wasRecentlyCreated) {
                 $this->command->info("{$appData['name']}: {$plainToken}");
             }
         }

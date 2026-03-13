@@ -186,7 +186,13 @@ php artisan db:seed --class=Modules\\Stopit\\Database\\Seeders\\StopitSeeder
 This will create:
 - Account: "Acme Corp"
 - User: admin@acme.test / password
-- Applications: GitMan, Jobify, Spotivel, TrollBeGone (with API tokens printed to console)
+- Applications: GitMan, Jobify, Spotivel, TrollBeGone
+
+API tokens are only printed on first run. To view them, add the `-v` flag:
+
+```bash
+php artisan db:seed --class=Modules\\Stopit\\Database\\Seeders\\StopitSeeder -v
+```
 
 1. **Start the development server**
 
