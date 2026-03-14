@@ -18,7 +18,7 @@ class DashboardService
             return $this->repository->getRecent($applicationId, 10);
         }
 
-        if ($accountId !== null && $accountId > 0) {
+        if (($accountId ?? 0) > 0) {
             return $this->repository->getRecentForAccount($accountId, 10);
         }
 
@@ -31,7 +31,7 @@ class DashboardService
             return $this->repository->getCountBySeverity($applicationId);
         }
 
-        if ($accountId !== null && $accountId > 0) {
+        if (($accountId ?? 0) > 0) {
             return $this->repository->getCountBySeverityForAccount($accountId);
         }
 
@@ -48,7 +48,7 @@ class DashboardService
             return $this->repository->getCountByClass($applicationId);
         }
 
-        if ($accountId !== null && $accountId > 0) {
+        if (($accountId ?? 0) > 0) {
             return $this->repository->getCountByClassForAccount($accountId);
         }
 

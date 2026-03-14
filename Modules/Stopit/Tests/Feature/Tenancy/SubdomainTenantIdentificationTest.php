@@ -8,6 +8,7 @@ use Modules\Stopit\Models\Account;
 use Modules\Stopit\Models\User;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
+use Tenancy\Facades\Tenancy;
 use Tests\TestCase;
 
 /**
@@ -48,6 +49,12 @@ class SubdomainTenantIdentificationTest extends TestCase
         $this->user->accounts()->attach($this->tenant->id, ['role' => WorkspaceRole::ADMIN->value]);
     }
 
+    protected function tearDown(): void
+    {
+        Tenancy::clearTenant();
+        parent::tearDown();
+    }
+
     #[Test]
     public function it_can_access_application_via_subdomain(): void
     {
@@ -72,6 +79,7 @@ class SubdomainTenantIdentificationTest extends TestCase
 
         /* Assert */
         $this->assertEquals(302, $response->status());
+        $this->assertNull(Tenancy::getTenant());
     }
 
     #[Test]
@@ -151,6 +159,13 @@ class SubdomainTenantIdentificationTest extends TestCase
         $found2 = Account::where('domain', 'spotivel')->first();
 
         /* Assert */
+        $this->assertNotNull($found1);
+        $this->assertEquals($this->tenant->id, $found1->id);
+        $this->assertNotNull($found2);
+        $this->assertEquals($tenant2->id, $found2->id);
+    }
+
+    #[Test]
     public function it_enforces_unique_domain_column(): void
     {
         /* Arrange */

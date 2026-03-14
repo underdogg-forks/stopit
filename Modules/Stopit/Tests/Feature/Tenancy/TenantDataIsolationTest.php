@@ -241,11 +241,6 @@ class TenantDataIsolationTest extends TestCase
     #[Test]
     public function it_marks_all_tenants_as_active_by_default(): void
     {
-        /* Arrange & Act */
-        $newTenant = Account::factory()->create(['domain' => 'new-tenant']);
-    #[Test]
-    public function it_marks_all_tenants_as_active_by_default(): void
-    {
         /* Arrange */
         $tenantWithImplicitDefault = Account::create([
             'name'   => 'Default Active Workspace',
